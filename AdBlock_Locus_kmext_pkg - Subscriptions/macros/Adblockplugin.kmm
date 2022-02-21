@@ -1,0 +1,516 @@
+﻿# This macro was modified by RJJIII from the following macro by JamesD and siria:
+#
+# UTF-8  K-Meleon Macros (http://kmeleon.sourceforge.net/wiki/index.php?id=MacroLanguage2)
+#
+# ---------- Adblockplugin.kmm  /  creates a menu + button (K-Meleon adblock plugin controls)
+#
+# Version : 2.9  2022-05-02  (macro by JamesD, v2.8 tiny bugfix by siria moved last 
+#	setcmdicon line for button pic, additional modification by RJJIII to package with
+#	K-Meleon 76.x as part of AdBlock Locus)
+# KM forum : http://kmeleonbrowser.org/forum/read.php?9,135175
+# KM forum : http://kmeleonbrowser.org/forum/read.php?9,135175
+# Dependencies :  K-Meleon/kplugins/adblock.dll   (or move into profile, create kplugins folder)
+# Rules list:     Create adblock.txt in profile folder and edit it manually.  Changes need restart.  
+# Rules list from web:  https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/adblock.txt
+# Preferences : Web list URL in "kmeleon.plugins.adblock.subscriptions" 
+#   (plugin)          "kmeleon.plugins.adblock.logging", "kmeleon.plugins.adblock.disabled",
+# Preferences       : "kmeleon.plugins.adblock.rules.auto", "kmeleon.plugins.adblock.log.auto", 
+#   (macro)           "kmeleon.plugins.adblock.rules.days", "kmeleon.plugins.adblock.log.days",
+#                     "kmeleon.plugins.adblock.rules.next", "kmeleon.plugins.adblock.log.next",
+#                     "kmeleon.plugins.adblock.rules.cleared", "kmeleon.plugins.adblock.log.cleared"
+#                     "kmeleon.plugins.adblock.icons.alternate"
+# Files             : adblock.txt, adblock.log, adblockmacro.log  ( in the profile )
+# -----------------------------------------------------------------------------------
+# Optional: additional little helper macro:  http://kmeleonbrowser.org/forum/read.php?9,145345
+# -----------------------------------------------------------------------------------
+
+_Adblockplugin_disable {
+menuchecked= getpref( BOOL, "kmeleon.plugins.adblock.disabled") ;
+macroinfo= _("Disable the plugin, checked or enable the plugin, un-checked.");
+macros("_Adblockplugin_toggle");
+}
+
+_Adblockplugin_subscriptions {
+macroinfo=_("View the list of subscriptions.");
+$_Adblockplugin_sources  = getpref( STRING, "kmeleon.plugins.adblock.subscriptions") ; 
+$_Adblockplugin_sources = sub( "|", "\n\n", $_Adblockplugin_sources );
+alert($_Adblockplugin_sources, _("Subscriptions"), INFO);
+}
+
+_Adblockplugin_logging {
+menuchecked= getpref( BOOL, "kmeleon.plugins.adblock.logging");
+macroinfo= _("Toggle logging. Checked is active.");
+togglepref( BOOL, "kmeleon.plugins.adblock.logging");
+$__adblogging = getpref(BOOL, "kmeleon.plugins.adblock.logging");
+$__adblogging ? $__adblogging = _("TRUE") : $__adblogging = _("FALSE");
+$_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Logging set to ").$__adblogging._(" by user.");
+appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+}
+
+_Adblockplugin_FileNotFound{
+alert(sub("%s",$acfg_File,_("The file %s could not be found.")),_(Adblock),EXCLAIM);
+}
+
+_Adblockplugin_rules {
+macroinfo=_("Open the rules (adblock.txt) in a text editor.");
+menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");
+$__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
+$__data=readfile($__path);
+if ($__data=="") {&_Adblockplugin_FileNotFoundRules;
+ } else {
+ $ext="txt"; &getSecureExtensionHandler;
+ exec(sub("%1",$__path,$cmdline));
+ }
+}
+
+_Adblockplugin_logs {
+macroinfo=_("Open the log file (adblock.log) in a text editor.");
+menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.log.cleared"); 
+$__path=getfolder(ProfileFolder)."\\".$ARG.".log";
+$__data=readfile($__path);
+if ($__data=="") {&_Adblockplugin_FileNotFound;
+ } else {
+ $ext="log"; &getExtensionHandler;
+ exec(sub("%1",$__path,$cmdline));
+ }
+}
+
+_Adblockplugin_clear_rules {
+macroinfo=_("Delete the current rules (adblock.txt).");
+menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");  
+$__path=getfolder(ProfileFolder)."\\adblock.txt" ;
+$__return = deletefile($__path);
+if ($__return) {
+  logmsg(_("Adblock clear rules succeded. code = ").$__return, warning);
+  setpref(BOOL, "kmeleon.plugins.adblock.rules.cleared", true); 
+  $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("The rules file, adblock.txt, was deleted by user.");
+  appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+  macros("_Adblockplugin_toolbar_set");
+  } else {
+  logmsg(_("Adblock clear rules failed. code = ").$__return, error);
+  }  
+}
+
+_Adblockplugin_clear_log {
+macroinfo=_("Delete the current log file (adblock.log).");
+menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.log.cleared");  
+$__path=getfolder(ProfileFolder)."\\adblock.log" ;
+$__return = deletefile($__path);
+if ($__return) {
+  logmsg(_("Adblock clear log succeded. code = ").$__return , warning);
+  setpref(BOOL, "kmeleon.plugins.adblock.log.cleared", true);
+  $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("The log file, adblock.log, was deleted by user.");
+  appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+  } else {
+  logmsg(_("Adblock clear log failed. code = ").$__return , error);
+  }  
+}
+
+_Adblockplugin_Aclear_rules {
+menuchecked= getpref( BOOL, "kmeleon.plugins.adblock.rules.auto") ;
+macroinfo= _("Set or unset automatic deletion of rules in adblock.txt.");
+togglepref( BOOL, "kmeleon.plugins.adblock.rules.auto");
+$__abauto = getpref(BOOL, "kmeleon.plugins.adblock.rules.auto");
+$__abauto ? $__abauto =_("ON") : $__abauto =_("OFF") ; 
+logmsg(_("Adblock plugin automatic value for rules set to ").$__abauto.".", warning);
+statusbar(_("Adblock rules file automatic deletion set to")." >> ".$__abauto." <<.");
+}    
+
+_Adblockplugin_Aclear_rules_I {
+macroinfo= _("Set the interval for the automatic deletion of rules in adblock.txt.");
+$_Adblockplugin_rule_days=getpref(INT, "kmeleon.plugins.adblock.rules.days");
+$__abtype = _("rules") ; $__abtypeL = "rules" ;
+macros("_Adblockplugin_Aclear_interval");
+}
+
+_Adblockplugin_Aclear_log {
+menuchecked= getpref( BOOL, "kmeleon.plugins.adblock.log.auto") ;
+macroinfo= _("Set or unset automatic deletion of adblock.log.");
+togglepref( BOOL, "kmeleon.plugins.adblock.log.auto");
+$__abauto = getpref(BOOL, "kmeleon.plugins.adblock.log.auto");
+$__abauto ? $__abauto =_("ON") : $__abauto =_("OFF") ; 
+logmsg(_("Adblock plugin automatic value for log set to ").$__abauto.".", warning);
+statusbar(_("Adblock log file automatic deletion set to")." >> ".$__abauto." <<.");
+}
+
+_Adblockplugin_Aclear_log_I {
+macroinfo= _("Set the interval for the automatic deletion of adblock.log.");
+$_Adblockplugin_log_days=getpref(INT, "kmeleon.plugins.adblock.log.days");
+$__abtype = _("log");  $__abtypeL = "log" ; 
+macros("_Adblockplugin_Aclear_interval");
+}
+
+_Adblockplugin_Aclear_interval {
+if ( $__abtypeL == "rules" ) {
+   $__abint = $_Adblockplugin_rule_days; }else{ $__abint = $_Adblockplugin_log_days; }
+$__abintxt1 = _("The measure of time used for\nautomatic actions is one day.\n\nThe value must be at least 1.") ;
+$__abintxt2 = _("The current value for deleting \n").$__abtype._(" is\t").$__abint.".";
+$__abintxt3 = _("Do you wish to change the current value?");  
+$__abcf = confirm( $__abintxt1."\n".$__abintxt2."\n\n".$__abintxt3 , _("Adblock ").$__abtype._(" days verification.") ,YESNO, QUESTION );
+if ($__abcf == "YES") { macros("_Adblockplugin_Aclear_int_chg") ;
+  }else{ $__abp = $__abint;   macros("_Adblockplugin_Aclear_InvSet"); }
+}
+
+_Adblockplugin_Aclear_int_chg {
+$__abp = prompt( _("Enter number of days between deletions."), _("Adblock ").$__abtype._(" days selection.") );
+$__abp > 0 ? macros("_Adblockplugin_Aclear_verify") : macros("_Adblockplugin_Aclear_OutRange");
+}
+
+_Adblockplugin_Aclear_OutRange {
+alert(_("The value is out of range. \nIt must be greater than zero"), _("Adblock interval"), EXCLAIM);
+macros("_Adblockplugin_Aclear_int_chg");
+}
+
+_Adblockplugin_Aclear_verify {  # ask whether to use proposed value
+$__abintxt2 = _("The proposed value for deleting \n").$__abtype._(" is\t").$__abp._(" days.");
+$__abintxt3 = _("Do you wish to use the proposed value?");  
+$__abcf = confirm( $__abintxt1."\n".$__abintxt2."\n\n".$__abintxt3 , _("Adblock ").$__abtype._(" new days verification.") ,YESNO, QUESTION );
+$__abcf == "YES" ? &_Adblockplugin_Aclear_InvSet : &_Adblockplugin_Aclear_retryexit ; 
+}
+
+_Adblockplugin_Aclear_InvSet {
+# $UNIXTIME = time(); 86400 = 1 day
+$__abnext = ($__abp * 86400) + time() ;
+setpref( INT, "kmeleon.plugins.adblock.".$__abtypeL.".next", $__abnext);
+$__abint == $__abp ? 0 : setpref( INT, "kmeleon.plugins.adblock.".$__abtypeL.".days", $__abp );
+statusbar(_("The pref ")."'kmeleon.plugins.adblock.".$__abtypeL.".next'"._(" set with days = ").$__abp.".");
+logmsg(_("The pref ")."'kmeleon.plugins.adblock.".$__abtypeL.".next'"._(" set with days = ").$__abp.".", warning);
+$_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("The pref ")."'kmeleon.plugins.adblock.".$__abtypeL.".next'"._(" set with days = ").$__abp.".";
+appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+macros("_Adblockplugin_BuildMenuAs");
+}
+
+_Adblockplugin_Aclear_retryexit {
+$__sbrty = confirm( _("Do you wish to retry setting \n the days value or \ncancel this operation?") , _("Adblock ").$__abtype._(" new days entry."), RETRYCANCEL , QUESTION );
+$__sbrty == "RETRY" ? &_Adblockplugin_Aclear_int_chg :0;
+}
+
+_Adblockplugin_macro_log {
+macroinfo=_("View the macro's log file.");
+$__path=getfolder(ProfileFolder)."\\".$ARG.".log";
+$__data=readfile($__path);
+if ($__data=="") {&_Adblockplugin_FileNotFound;
+ } else {
+ $ext="log"; &getExtensionHandler;
+ exec(sub("%1",$__path,$cmdline));
+ }
+}
+
+_Adblockplugin_DayCheck {  ## DayCheck happens OnQuit.  Logmsg() items are lost
+$_adblockmacro_text = "";  ## set macrotext value to empty -  global over both rules and log
+## if rules have been cleared and offline then insert dummy rules
+$__path=getfolder(ProfileFolder)."\\adblock.txt";
+if ( getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared") ) {
+   if ( getpref(BOOL, "kmeleon.general.offline") ) {  ## OFFLINE
+      $__return = writefile($__path, "[BASIC ADBLOCK]\n!dummy for offline hold"); 
+      if ($__return) {
+         $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt - dummy data for offline.");
+      } else {
+         $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt - dummy data for offline failed. code = ").$__return;
+      }
+      ## if rules are cleared and online, check for dummy and clear if found
+   } else {  ## ONLINE
+      if (fileexists($__path)) {
+         $__return = deletefile($__path); 
+         if ($__return) {
+           $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt - removed dummy data for offline.");
+           } else {
+           $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt - removed dummy data for offline failed. code = ").$__return;
+          }
+      }
+   }
+}
+getpref( BOOL, "kmeleon.general.offline") ? &_Adblockplugin_DayCheck3 : &_Adblockplugin_DayCheck2 ;   
+}
+
+_Adblockplugin_DayCheck2 {
+if ((getpref(BOOL,"kmeleon.plugins.adblock.rules.auto")) and ( time() > getpref(INT,"kmeleon.plugins.adblock.rules.next"))) {
+   $__path=getfolder(ProfileFolder)."\\adblock.txt";
+   ## remove existing adblock.txt file
+   if (fileexists($__path)) {
+     $__return = deletefile($__path);
+     if ($__return) {
+       $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt file deleted automaticly.");
+       } else {
+       $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock clear rules (adblock.txt) failed. code = ").$__return;
+       }
+     }
+     ## increment the rules.next by days
+     $__abp = getpref(INT, "kmeleon.plugins.adblock.rules.days");
+     $__abnext = ($__abp * 86400) + time() ;
+     setpref(INT, "kmeleon.plugins.adblock.rules.next", $__abnext); 
+     $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock next rules delete was set to ").$__abnext." for ". date( "%Y-%m-%d %H:%M",$__abnext );
+}
+if ((getpref(BOOL,"kmeleon.plugins.adblock.log.auto")) and ( time() > getpref(INT,"kmeleon.plugins.adblock.log.next"))) {
+   $__path=getfolder(ProfileFolder)."\\adblock.log";
+   ## remove existing adblock.log file
+   if (fileexists($__path)) {
+     $__return = deletefile($__path);
+     if ($__return) {
+       $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.log file deleted automaticly.");
+       } else {
+       $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock clear log (adblock.log) failed. code = ").$__return;
+       }
+     }
+     ## increment the log.next by days
+     $__abp = getpref(INT, "kmeleon.plugins.adblock.log.days");
+     $__abnext = ($__abp * 86400) + time() ;
+     setpref(INT, "kmeleon.plugins.adblock.log.next", $__abnext); 
+     $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock next log delete was set to ").$__abnext." for ". date( "%Y-%m-%d %H:%M",$__abnext );
+}
+macros("_Adblockplugin_DayCheck3") ;
+}
+
+_Adblockplugin_DayCheck3 {
+$_BABmacro_path = getfolder(ProfileFolder)."\\adblockmacro.log";
+length($_adblockmacro_text) > 1 ? appendfile($_BABmacro_path, $_adblockmacro_text) : 0; ## a single file operation for daycheck
+}
+
+_Adblockplugin_QV {
+macroinfo=_("Display current settings.");
+$__adbQrunning = getpref(BOOL, "kmeleon.plugins.adblock.disabled");
+$__adbQrunning ? $__adbQrunning = _("TRUE") : $__adbQrunning = _("FALSE");
+$__adbQlogauto = getpref(BOOL, "kmeleon.plugins.adblock.log.auto");
+$__adbQlogauto ? $__adbQlogauto = _("TRUE") : $__adbQlogauto = _("FALSE");
+$__adbQlogclear = getpref(BOOL, "kmeleon.plugins.adblock.log.cleared");
+$__adbQlogclear ? $__adbQlogclear = _("TRUE") : $__adbQlogclear = _("FALSE");
+$__adbQloginterval = getpref(INT, "kmeleon.plugins.adblock.log.days");
+$__adbQlognext = getpref(INT, "kmeleon.plugins.adblock.log.next");
+$__adbQlogging = getpref(BOOL, "kmeleon.plugins.adblock.logging");
+$__adbQlogging ? $__adbQlogging = _("TRUE") : $__adbQlogging = _("FALSE");
+$__adbQruleauto = getpref(BOOL, "kmeleon.plugins.adblock.rules.auto");
+$__adbQruleauto ? $__adbQruleauto = _("TRUE") : $__adbQruleauto = _("FALSE");
+$__adbQruleclear = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");
+$__adbQruleclear ? $__adbQruleclear = _("TRUE") : $__adbQruleclear = _("FALSE");
+$__adbQruleinterval = getpref(INT, "kmeleon.plugins.adblock.rules.days");
+$__adbQrulenext = getpref(INT, "kmeleon.plugins.adblock.rules.next");
+$__adbQtxt = fileexists(getfolder(ProfileFolder))."\\adblock.txt";
+$__adbQtxt ? $__adbQtxt = _("AVAILABLE") : $__adbQtxt = _("NOT AVAILABLE");
+$__adbQlog = getfolder(ProfileFolder)."\\adblock.log";
+$__adbQlog ? $__adbQlog = _("AVAILABLE") : $__adbQlog = _("NOT AVAILABLE");
+$__adbQicon = getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate");
+$__adbQicon ? $__adbQicon = _("TRUE") : $__adbQicon = _("FALSE"); 
+$__adbQtext = _("Plugin disabled is ").$__adbQrunning;
+$__adbQtext = $__adbQtext ."\n". _("Logging is ").$__adbQlogging;
+$__adbQtext = $__adbQtext ."\n". _("File adblock.txt is ").$__adbQtxt;
+$__adbQtext = $__adbQtext ."\n". _("File adblock.log is ").$__adbQlog;
+$__adbQtext = $__adbQtext ."\n". _("Displaying alternate icons is ").$__adbQicon;
+$__adbQtext = $__adbQtext ."\n\n". _("Automatics");
+$__adbQtext = $__adbQtext ."\n". _("Auto delete rules is ").$__adbQruleauto;
+$__adbQtext = $__adbQtext ."\n". _("Interval for rules is ").$__adbQruleinterval._(" days.");
+$__adbQtext = $__adbQtext ."\n". _("Next date for rules is ").date("%Y-%m-%d %H:%M", $__adbQrulenext);
+$__adbQtext = $__adbQtext ."\n". _("Auto delete log is ").$__adbQlogauto;
+$__adbQtext = $__adbQtext ."\n". _("Interval for log is ").$__adbQloginterval._(" days.");
+$__adbQtext = $__adbQtext ."\n". _("Next date for log is ").date("%Y-%m-%d %H:%M", $__adbQlognext);
+alert($__adbQtext, _("Adblock Locus settings"), INFO);
+}
+
+_Adblockplugin_ICONS {
+menuchecked= getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate" ) ;
+macroinfo = _("If checked, green indicates that the adblocker is ON.");
+togglepref( BOOL, "kmeleon.plugins.adblock.icons.alternate") ;
+$_Adblockplugin_IcoChg = true;
+macros("_Adblockplugin_toolbar_set");
+}
+
+
+
+_Adblockplugin_allowPage {
+macroinfo= _("Add an exception for the current contents of the URL bar.");
+$_line="@@";
+$_line=$_line . $URLBAR . "^$document" . "\n\n";
+$_file=getfolder(ProfileFolder)."\\adblock.txt";
+$_x=appendfile($_file, $_line);
+$_allowConfirm="An exception was made for " . $URL ." \n\nIt will be allowed after you restart K-Meleon.";
+$_file2=getfolder(ProfileFolder)."\\adblock_user.txt";
+$_x=appendfile($_file2, $_line);
+if ($_x==false) alert("AdBlock Locus cannot write to adblock.txt rules.","Error",EXCLAIM);
+alert($_allowConfirm);
+}
+
+
+
+_Adblockplugin_About{
+macroinfo= _("Display information, version number, and copyright for AdBlock Locus.");
+alert(_("AdBlock Locus enables access to K-Meleon's built-in adblocker. It was created by the community and is not endorsed by K-Meleon or AdBlock Plus. For development information and support visit the K-Meleon forums.
+
+AdBlock Locus has been distributed freely and is provided AS IS, WITHOUT WARRANTY OF ANY KIND. In no event shall the authors be liable for any claim, damage, or other liability.
+
+Version 0.9
+
+© 2022, all rights reserved."),_("AdBlock Locus"));}
+
+
+
+_Adblockplugin_FileNotFoundRules{
+$_file=getfolder(ProfileFolder)."\\adblock.txt";
+$_x=appendfile($_file, "! No rules were found. If this your first time running AdBlock Locus, clear the rules and restart K-Meleon. Any rules you add to this text file will take effect the next time you start K-Meleon. You can use the rules from an AdBlock Plus installation's patterns.ini, you can create your own rules manually using AdBlock Plus syntax, you can use a subscription, or you can generate a blocklist from a macro like nukeimage2adblockBAB. If you have an adblock.txt list of rules in another folder, you can copy and paste them into this document.");
+$__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
+$__data=readfile($__path);
+if ($__data=="") {&_Adblockplugin_FileNotFound;
+ } else {
+ $ext="txt"; &getSecureExtensionHandler;
+ exec(sub("%1",$__path,$cmdline));
+ }
+}
+
+_Adblockplugin_initial {
+$__abpmacro_path = getfolder(ProfileFolder) . "//adblockmacro.log";
+$_Adblockplugin_len = length(getpref( STRING, "kmeleon.plugins.adblock.subscriptions") );
+$__abrdays = getpref(INT, "kmeleon.plugins.adblock.rules.days");
+if ($__abrdays < 1) {
+ setpref(INT, "kmeleon.plugins.adblock.rules.days", 5);
+ $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock rules delete interval was set to "). 5;
+ appendfile($__abpmacro_path, "\n".$_adblockmacro_text);
+ $__abnext = (5 * 86400) + time() ;
+ setpref(INT, "kmeleon.plugins.adblock.rules.next", $__abnext);
+ $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock next rules delete was set to ").$__abnext." for ". date( "%Y-%m-%d %H:%M",$__abnext );
+ appendfile($__abpmacro_path, "\n".$_adblockmacro_text);
+ }
+$__abldays = getpref(INT, "kmeleon.plugins.adblock.log.days");
+if ($__abldays < 1) {
+ setpref(INT, "kmeleon.plugins.adblock.log.days", 5);
+ $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock log delete interval was set to "). 5;
+ appendfile($__abpmacro_path, "\n".$_adblockmacro_text);
+ $__abnext = (5 * 86400) + time() ;
+ setpref(INT, "kmeleon.plugins.adblock.log.next", $__abnext);
+ $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock next log delete was set to ").$__abnext." for ". date( "%Y-%m-%d %H:%M",$__abnext );
+ appendfile($__abpmacro_path, "\n".$_adblockmacro_text);
+ }
+$_Adblockplugin_len <3 ? &_Adblockplugin_initial_load : 0 ;
+}
+
+_Adblockplugin_initial2 {
+$__abrdays = getpref(INT, "kmeleon.plugins.adblock.rules.days");
+if ($__abrdays < 1) {
+ setpref(INT, "kmeleon.plugins.adblock.rules.days", 5);
+ $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock rules delete interval was set to "). 5;
+ appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+ $__abnext = (5 * 86400) + time() ;
+ setpref(INT, "kmeleon.plugins.adblock.rules.next", $__abnext);
+ $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock next rules delete was set to ").$__abnext." for ". date( "%Y-%m-%d %H:%M",$__abnext );
+ appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+ }
+$__abldays = getpref(INT, "kmeleon.plugins.adblock.log.days");
+if ($__abldays < 1) {
+ setpref(INT, "kmeleon.plugins.adblock.log.days", 5);
+ $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock log delete interval was set to "). 5;
+ appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+ $__abnext = (5 * 86400) + time() ;
+ setpref(INT, "kmeleon.plugins.adblock.log.next", $__abnext);
+ $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock next log delete was set to ").$__abnext." for ". date( "%Y-%m-%d %H:%M",$__abnext );
+ appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+ }
+}
+
+_Adblockplugin_initial_load {
+$_Adblock_W_txt = _("Adblocking rules for K-Meleon's built-in");
+$_Adblock_W_txt = $_Adblock_W_txt . "\n" . _("adblocker must be downloaded before");
+$_Adblock_W_txt = $_Adblock_W_txt . "\n" . _("AdBlock Locus can run.");
+$_Adblock_W_txt = $_Adblock_W_txt . "\n\n" . _("Do you wish to download the rules");
+$_Adblock_W_txt = $_Adblock_W_txt . "\n" . _("and restart the browser?");
+$_Adblock_Q_Load = confirm( $_Adblock_W_txt , _("K-Meleon Basic Adblock Plugin") , YESNO , QUESTION ); 
+if ( $_Adblock_Q_Load == "YES" ) {
+  $_Adblockplugin_load = "https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Core.txt";
+  $_Adblockplugin_load = $_Adblockplugin_load ."|". "https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Fallback.txt" ; 
+  setpref(STRING, "kmeleon.plugins.adblock.subscriptions", $_Adblockplugin_load ) ;
+  $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock subscriptions initial load approved.");
+  appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+  macros("_Adblockplugin_initial2");
+  } else {
+  $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock subscriptions initial load deferred.");
+  appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+}
+removebutton("Adblock_plugin", "macros(_Adblockplugin_toggle)" );
+# ?? remove or change?
+addbutton("Adblock_plugin", "macros(basic_ab_Dummy)", "Adblock Locus", "Adblock Locus is INACTIVE \n no rules");
+setcmdicon("macros(basic_ab_Dummy)", "km-ab-dead.ico" );
+}
+
+_Adblockplugin_toggle {
+togglepref( BOOL, "kmeleon.plugins.adblock.disabled") ;
+macros("_Adblockplugin_toolbar_set");
+$__adbdisabled = getpref(BOOL, "kmeleon.plugins.adblock.disabled");
+$__adbdisabled ? $__adbdisabled = _("DISABLED") : $__adbdisabled = _("ENABLED");
+$_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Ad blocking is ").$__adbdisabled._(" by user.");
+appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+statusbar(_("Ad blocking is ").$__adbdisabled);
+}
+
+_Adblockplugin_BuildMenu {
+if (($VERSION >= 33685507) and (pluginexist(adblock)) ) {  # K-Meleon 75.1 or greater and adblock plugin
+    ## DO NOT set rules cleared to false if adblock.txt contains dummy string
+    $_Adblockplugin_IcoChg = false;
+    $__path=getfolder(ProfileFolder)."\\adblock.txt";
+    if ( readfile($__path) != "[BASIC ADBLOCK]\n!dummy for offline hold" )  {
+      setpref(BOOL, "kmeleon.plugins.adblock.rules.cleared", false);
+    }
+    setpref(BOOL, "kmeleon.plugins.adblock.log.cleared", false); 
+    $_adp= "AdBlock Locus";
+	setmenu("PrivacySecurity", popup, $_adp, -1);
+    setmenu($_adp, macro, "Allow page", "_Adblockplugin_allowPage", 0);
+    setmenu($_adp, macro, "Enable Logging", "_Adblockplugin_logging", 1);
+	setmenu($_adp, separator, 2);
+    setmenu($_adp, macro, "About", "_Adblockplugin_About", 3);		
+    $_adA= "Advanced";  $_adAm= "Automatic Settings";
+    setmenu($_adp, macro, "View settings", "_Adblockplugin_QV", 4);
+    setmenu($_adp, macro, "Invert icons", "_Adblockplugin_ICONS", 5);
+	setmenu($_adp, popup, $_adA, 6);
+	setmenu($_adp, popup, $_adAm, 7);    
+    setmenu($_adp, separator, $_adA);    
+    setmenu($_adA, macro, "List subscriptions", "_Adblockplugin_subscriptions", 0);
+    setmenu($_adA, macro, "View the rules", "_Adblockplugin_rules(adblock)", 1);
+    setmenu($_adA, macro, "Clear the rules", "_Adblockplugin_clear_rules", 2);
+    setmenu($_adA, macro, "View the log", "_Adblockplugin_logs(adblock)", 3);
+    setmenu($_adA, macro, "Clear the log", "_Adblockplugin_clear_log", 4);
+	setmenu($_adA, separator, 5);
+	setmenu($_adA, macro, "View the macro's log", "_Adblockplugin_macro_log(adblockmacro)", 6);
+    macros("_Adblockplugin_BuildMenuAs");	
+    ## create toolbar and set button
+    # check icon and set tool tip
+    $_adblockmacro_TTip = "Block ads. Right click for more options." ; 
+    addtoolbar("AdBlock Locus") ;
+    addbutton("AdBlock Locus", "macros(_Adblockplugin_toggle)", "AdBlock Locus", $_adblockmacro_TTip);
+    macros("_Adblockplugin_toolbar_set");
+    }
+}
+
+_Adblockplugin_BuildMenuAs {
+    setmenu($_adAm, macro, "Enable rules autodeletion", "_Adblockplugin_Aclear_rules", 0);
+    setmenu($_adAm, macro, "Set interval for rules - ".getpref(INT,"kmeleon.plugins.adblock.rules.days"), "_Adblockplugin_Aclear_rules_I", 1);
+    setmenu($_adAm, separator, 2);     
+    setmenu($_adAm, macro, "Enable log file autodeletion", "_Adblockplugin_Aclear_log", 3); 
+    setmenu($_adAm, macro, "Set interval for log - ".getpref(INT,"kmeleon.plugins.adblock.log.days"), "_Adblockplugin_Aclear_log_I", 4);
+}
+
+_Adblockplugin_toolbar_set {
+$__abptog = getpref( BOOL, "kmeleon.plugins.adblock.disabled");
+$_Adblockplugin_rules = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");
+# check icon and set tool tip
+if (getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate" ) ) { $__imgn = 3; } else { $__imgn = 0; }
+$_adblockmacro_EIcon = "Basic_Adblock.png[".0+$__imgn.", 32 ,32]"; 
+$_adblockmacro_DIcon = "Basic_Adblock.png[".1+$__imgn.", 32 ,32]"; 
+$_adblockmacro_XIcon = "Basic_Adblock.png[".2+$__imgn.", 32 ,32]";
+# change tool tip if from  _Adblockplugin_ICONS 
+if ( $_Adblockplugin_IcoChg ) {
+       # check icon and set tool tip
+    if (getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate" ) ) {
+       $_adblockmacro_TTip = "AdBlock Locus: ON[green] OFF[red]" ; } else {
+       $_adblockmacro_TTip = "Block ads. Right click for more options." ;}
+   removebutton("AdBlock Locus", "macros(_Adblockplugin_toggle)" );
+   addbutton("AdBlock Locus", "macros(_Adblockplugin_toggle)", "AdBlock Locus", $_adblockmacro_TTip);
+   $_Adblockplugin_IcoChg = false;
+   }
+$__abptog==0 ? setcmdicon( "macros(_Adblockplugin_toggle)", $_adblockmacro_EIcon ) : setcmdicon("macros(_Adblockplugin_toggle)", $_adblockmacro_DIcon );
+if (getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared")) {
+  removebutton("AdBlock Locus", "macros(_Adblockplugin_toggle)" );
+  addbutton("AdBlock Locus", "macros(basic_ab_Dummy)", "AdBlock Locus", "Adblock plugin INACTIVE \n no rules");
+  }  
+  setcmdicon("macros(basic_ab_Dummy)", $_adblockmacro_XIcon );
+}
+
+# -----------------------------------------------------------
+$OnQuit=$OnQuit."_Adblockplugin_DayCheck;";
+$OnSetup=$OnSetup."_Adblockplugin_initial;";
+$OnInit=$OnInit."_Adblockplugin_BuildMenu;";
+$macroModules=$macroModules."Adblockplugin;";

@@ -1,0 +1,106 @@
+﻿#ß UTF-8 K-Meleon Macros (http://kmeleon.sourceforge.net/wiki/index.php?id=MacroLanguage2)
+#
+# ---------------------- NukeImage2adblockBAB.kmm   ----------------------
+#  For permanent image blocking. This macro depends on native KPLUGIN adblock.dll (see notes below)
+#  This macro writes rules into files:  profile/adblock.txt +  adblock_user.txt (as backup)
+#  That file can be edited manually too. Same syntax as for adblockplus, except hiding rules (##)
+#  Note: currently the plugin will notice changed rules only at next browser start.
+#
+#  Version :   		v1  /  2018-01-26  by siria
+#  Menu:  		right-click an IMAGE > Remove Image > adblock.dll (BAB) + Edit
+#  Forum:  		http://kmeleonbrowser.org/forum/read.php?9,145345
+#  Resources:  	kplugin/adblock.dll (Basic Adblock Plugin, contained in current dev KM)
+#  K-Meleon version:   75.0 or newer
+# -------------------------------------------------------------------------------------------
+#
+#  Notes for Basic Adblock Plugin (kplugins/adblock.dll):   
+#  Activation here:  F2 > K-Meleon Plugins > adblock
+#  The kplugin reads rules from file profile/adblock.txt
+#  Too see a button+menu install macro Adblockplugin.kmm by JamesD
+#  It can be configured to automatically download giant filter lists from the web. 
+#  Check prefs here:  about:config?filter=adblock
+#  French default subscriptions: 
+#  https://easylist-downloads.adblockplus.org/liste_fr+easylist.txt|https://secure.fanboy.co.nz/fanboy-social.txt
+# -------------------------------------------------------------------------------------------
+
+NukeImage2BAB{
+macroinfo="Remove image until next page load";
+# nukeit by joykiller www.digivill.net/~joykillr/kmeleon
+$_x="*[src*=\"".basename($ImageURL)."\"] {display:none !important;}";
+injectCSS($_x);
+}
+
+NukeImage2adblockBAB{
+macroinfo="Remove image permanently, needs kplugin adblock.dll. Write into profile/adblock.txt";
+menuchecked=getpref(BOOL,"kmeleon.plugins.adblock.load") * !getpref(BOOL,"kmeleon.plugins.adblock.disabled");
+&NukeImage2BAB;
+if (getpref(BOOL,"kmeleon.plugins.adblock.load")==false) 
+	alert("kplugin adblock.dll is either ".$off."\nor not installed?\n(F2 > KM Plugins > adblock)",$off."  (Basic Adblock Plugin)",STOP); 
+else{
+	if (getpref(BOOL,"kmeleon.plugins.adblock.disabled")==true) {
+		if (confirm("Enable?",$off."  (Basic Adblock Plugin)",YESNOCANCEL,EXCLAIM)=="YES") setpref(BOOL,"kmeleon.plugins.adblock.disabled",false); 
+	}}
+$_url=dirname($ImageURL);
+#  $_url=substr($_url,index($_url,"//")+2);
+$_url=prompt("Examples:  www.baddomain.*/ads/     ||baddomain.com/","Block here:",$_url);
+if ($_url>"") {
+	$_img=prompt("Example:  adpic*.png","Match image name:",basename($ImageURL));
+	if ($_img>"") {
+		$_line=$_url."/".$_img;
+		$_line==$ImageURL ? 0 : $_line=$_url."*".$_img;
+		$_line=gsub("**","*",$_line);
+		$_comm=prompt($_line,"Optional: comment","");
+		if ($_comm>"") $_comm="!  ".$_comm."\n"  ;
+		$_line=$_comm.$_line."\n\n";
+		$_file=getfolder(ProfileFolder)."\\adblock.txt";
+		$_x=appendfile($_file, $_line);
+		$_file2=getfolder(ProfileFolder)."\\adblock_user.txt";
+		$_x=appendfile($_file2, $_line);
+		if ($_x==false) alert("Needs K-Meleon 75 or newer.\nOr check your write permission in profile?","Error",EXCLAIM);
+		else { 
+			&NukeImage2adblockBAB_subs;
+			if (confirm($_line."Written into profile/adblock.txt + adblock_user.txt\nWill work in next session.\n\nEdit files?","Basic Adblock Plugin:  Edit files?",YESNOCANCEL,QUESTION)=="YES") &NukeImage2adblockBAB_openFile;
+}}}
+$_url=""; $_img=""; $_line=""; $_file=""; $_file2=""; $_x="";
+}
+
+
+NukeImage2adblockBAB_openFile{
+macroinfo="Open files for Basic Adblock: profile/adblock.txt + adblock_user.txt";
+$ext="css"; &getExtensionHandler;
+if (index($cmdline,"notepad.exe")==0) {
+	$ext="kmm"; &getExtensionHandler; }
+if (index($cmdline,"notepad.exe")==0) {
+	$ext="txt"; &getExtensionHandler; }
+index($cmdline,"notepad.exe")==0 ? $cmdline=sub("notepad.exe","write",$cmdline) : 0;
+$_path=getfolder(ProfileFolder)."\\adblock.txt";
+exec(sub("%1",$_path,$cmdline));
+$_path=getfolder(ProfileFolder)."\\adblock_user.txt";
+exec(sub("%1",$_path,$cmdline));
+#  Alternative EDITORS:
+#  exec("c:/xxx/app.exe \"".$_path."\"");
+#  alert($_path,"file editor path (debug)",INFO);
+$_path=""; $cmdline="";
+}
+
+NukeImage2adblockBAB_subs{
+$_subs=getpref(STRING, "kmeleon.plugins.adblock.subscriptions");
+if (index($_subs,"/adblock_user.txt")<0) {
+	$_x=getfolder(ProfileFolder)."\\adblock_user.txt";
+	$_x="file:///".gsub("\\","/",$_x);
+	$_subs=="" ? $_subs=$_x : $_subs=$_subs."|".$_x;
+	setpref(STRING, "kmeleon.plugins.adblock.subscriptions", $_subs);
+	}
+$_subs=""; $_x="";
+}
+
+_NukeImage2adblockBAB_BuildMenu{
+setmenu(ImageView,inline,"NukeImage2BAB", 1);
+setmenu("NukeImage2BAB", macro, "Hide image", "NukeImage2BAB");
+setmenu("NukeImage2BAB", macro, "Nuke image with AdBlock Locus", "NukeImage2adblockBAB");
+#setmenu("NukeImage2BAB", macro, "Remove Image > Edit", "NukeImage2adblockBAB_openFile");
+}
+
+# -----------------------------
+$OnInit=$OnInit."_NukeImage2adblockBAB_BuildMenu;";
+$macroModules=$macroModules."NukeImage2adblockBAB;";
