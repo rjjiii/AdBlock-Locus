@@ -1,0 +1,29 @@
+! This Source Code Form is subject to the terms of the Mozilla Public
+! License, v. 2.0. If a copy of the MPL was not distributed with this
+! file, You can obtain one at https://mozilla.org/MPL/2.0/.
+! Version: 1
+! Title: AdBlock Locus Fallback
+! Last modified: 2/4/2022
+! Expires: 5 days (update frequency)
+! Homepage: https://sourceforge.net/projects/adblock-locus/
+!
+
+!
+! Broken site fallback
+!
+
+||developer.mozilla.org$script
+
+
+||weather-brokercdn.api.bbci.co.uk$script
+||mybbc-analytics.files.bbci.co.uk$script
+
+! Daily Mail
+||uk-script.dotmetrics.net$script
+||cmp.dmgmediaprivacy.co.uk$script
+
+! Newegg.com
+||https://cdn.quadpay.com/v1/$script
+
+||https://www.myabandonware.com/$script
+||https://secure.quantserve.com$script
