@@ -58,8 +58,7 @@ if ($_url>"") {
 		$_x=appendfile($_file2, $_line);
 		if ($_x==false) alert("Needs K-Meleon 75 or newer.\nOr check your write permission in profile?","Error",EXCLAIM);
 		else { 
-			&NukeImage2adblockBAB_subs;
-			if (confirm($_line."Written into profile/adblock.txt + adblock_user.txt\nWill work in next session.\n\nEdit files?","Basic Adblock Plugin:  Edit files?",YESNOCANCEL,QUESTION)=="YES") &NukeImage2adblockBAB_openFile;
+			alert("Image nuked with AdBlock Locus. Custom blocking rule created in adblock_user.txt.", "Image Nuked");
 }}}
 $_url=""; $_img=""; $_line=""; $_file=""; $_file2=""; $_x="";
 }
@@ -84,14 +83,7 @@ $_path=""; $cmdline="";
 }
 
 NukeImage2adblockBAB_subs{
-$_subs=getpref(STRING, "kmeleon.plugins.adblock.subscriptions");
-if (index($_subs,"/adblock_user.txt")<0) {
-	$_x=getfolder(ProfileFolder)."\\adblock_user.txt";
-	$_x="file:///".gsub("\\","/",$_x);
-	$_subs=="" ? $_subs=$_x : $_subs=$_subs."|".$_x;
-	setpref(STRING, "kmeleon.plugins.adblock.subscriptions", $_subs);
-	}
-$_subs=""; $_x="";
+ 
 }
 
 _NukeImage2adblockBAB_BuildMenu{

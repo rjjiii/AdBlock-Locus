@@ -52,7 +52,7 @@ alert(sub("%s",$acfg_File,_("The file %s could not be found.")),_(Adblock),EXCLA
 }
 
 _Adblockplugin_rules {
-macroinfo=_("Open the rules (adblock.txt) in a text editor.");
+macroinfo=_("Open the rules in a text editor.");
 menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");
 $__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
 $__data=readfile($__path);
@@ -108,7 +108,7 @@ if ($__return) {
 
 _Adblockplugin_Aclear_rules {
 menuchecked= getpref( BOOL, "kmeleon.plugins.adblock.rules.auto") ;
-macroinfo= _("Set or unset automatic deletion of rules in adblock.txt.");
+macroinfo= _("Toggle automatic update of rules from subscriptions.");
 togglepref( BOOL, "kmeleon.plugins.adblock.rules.auto");
 $__abauto = getpref(BOOL, "kmeleon.plugins.adblock.rules.auto");
 $__abauto ? $__abauto =_("ON") : $__abauto =_("OFF") ; 
@@ -117,7 +117,7 @@ statusbar(_("Adblock rules file automatic deletion set to")." >> ".$__abauto." <
 }    
 
 _Adblockplugin_Aclear_rules_I {
-macroinfo= _("Set the interval for the automatic deletion of rules in adblock.txt.");
+macroinfo= _("Set the interval for automatic updates.");
 $_Adblockplugin_rule_days=getpref(INT, "kmeleon.plugins.adblock.rules.days");
 $__abtype = _("rules") ; $__abtypeL = "rules" ;
 macros("_Adblockplugin_Aclear_interval");
@@ -125,7 +125,7 @@ macros("_Adblockplugin_Aclear_interval");
 
 _Adblockplugin_Aclear_log {
 menuchecked= getpref( BOOL, "kmeleon.plugins.adblock.log.auto") ;
-macroinfo= _("Set or unset automatic deletion of adblock.log.");
+macroinfo= _("Toggle automatic deletion of logs.");
 togglepref( BOOL, "kmeleon.plugins.adblock.log.auto");
 $__abauto = getpref(BOOL, "kmeleon.plugins.adblock.log.auto");
 $__abauto ? $__abauto =_("ON") : $__abauto =_("OFF") ; 
@@ -134,7 +134,7 @@ statusbar(_("Adblock log file automatic deletion set to")." >> ".$__abauto." <<.
 }
 
 _Adblockplugin_Aclear_log_I {
-macroinfo= _("Set the interval for the automatic deletion of adblock.log.");
+macroinfo= _("Set the interval for the automatic deletion logs.");
 $_Adblockplugin_log_days=getpref(INT, "kmeleon.plugins.adblock.log.days");
 $__abtype = _("log");  $__abtypeL = "log" ; 
 macros("_Adblockplugin_Aclear_interval");
@@ -314,14 +314,27 @@ macros("_Adblockplugin_toolbar_set");
 }
 
 
-
-_Adblockplugin_allowPage {
-macroinfo= _("Add an exception for the current contents of the URL bar.");
-$_line="@@";
-$_line=$_line . $URLBAR . "^$document" . "\n\n";
+_Adblockplugin_allowDomain {
+macroinfo= _("Add an exception for this domain.");
+$_ABL_domain = hostname($URLBAR);  
+$_line="\n\n@@||";
+$_line=$_line.$_ABL_domain."^\n\n";
 $_file=getfolder(ProfileFolder)."\\adblock.txt";
 $_x=appendfile($_file, $_line);
-$_allowConfirm="An exception was made for " . $URL ." \n\nIt will be allowed after you restart K-Meleon.";
+$_allowConfirm="An exception was made for " . $_ABL_domain ." \n\nIt will be allowed after you restart K-Meleon.";
+$_file2=getfolder(ProfileFolder)."\\adblock_user.txt";
+$_x=appendfile($_file2, $_line);
+if ($_x==false) alert("AdBlock Locus cannot write to adblock.txt rules.","Error",EXCLAIM);
+alert($_allowConfirm);
+}
+
+_Adblockplugin_allowAddress {
+macroinfo= _("Add an exception for the current contents of the URL bar.");
+$_line="\n\n@@";
+$_line=$_line.$URLBAR."\n\n";
+$_file=getfolder(ProfileFolder)."\\adblock.txt";
+$_x=appendfile($_file, $_line);
+$_allowConfirm="An exception was made for " . $URLBAR ." \n\nIt will be allowed after you restart K-Meleon.";
 $_file2=getfolder(ProfileFolder)."\\adblock_user.txt";
 $_x=appendfile($_file2, $_line);
 if ($_x==false) alert("AdBlock Locus cannot write to adblock.txt rules.","Error",EXCLAIM);
@@ -338,7 +351,8 @@ AdBlock Locus has been distributed freely and is provided AS IS, WITHOUT WARRANT
 
 Version 0.9
 
-© 2022, all rights reserved."),_("AdBlock Locus"));}
+© 2022, all rights reserved."),_("AdBlock Locus"));
+}
 
 
 
@@ -355,6 +369,7 @@ if ($__data=="") {&_Adblockplugin_FileNotFound;
 }
 
 _Adblockplugin_initial {
+# setpref(BOOL, "kmeleon.plugins.adblock.rules.auto", true);
 $__abpmacro_path = getfolder(ProfileFolder) . "//adblockmacro.log";
 $_Adblockplugin_len = length(getpref( STRING, "kmeleon.plugins.adblock.subscriptions") );
 $__abrdays = getpref(INT, "kmeleon.plugins.adblock.rules.days");
@@ -404,23 +419,16 @@ if ($__abldays < 1) {
 }
 
 _Adblockplugin_initial_load {
-$_Adblock_W_txt = _("Adblocking rules for K-Meleon's built-in");
-$_Adblock_W_txt = $_Adblock_W_txt . "\n" . _("adblocker must be downloaded before");
-$_Adblock_W_txt = $_Adblock_W_txt . "\n" . _("AdBlock Locus can run.");
-$_Adblock_W_txt = $_Adblock_W_txt . "\n\n" . _("Do you wish to download the rules");
-$_Adblock_W_txt = $_Adblock_W_txt . "\n" . _("and restart the browser?");
-$_Adblock_Q_Load = confirm( $_Adblock_W_txt , _("K-Meleon Basic Adblock Plugin") , YESNO , QUESTION ); 
-if ( $_Adblock_Q_Load == "YES" ) {
+  $_Adblockplugin_usersub=getfolder(ProfileFolder)."\\adblock_user.txt";
   $_Adblockplugin_load = "https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Core.txt";
   $_Adblockplugin_load = $_Adblockplugin_load ."|". "https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Fallback.txt" ; 
+  $_Adblockplugin_load = $_Adblockplugin_load ."|".   $_Adblockplugin_usersub ;   
+
   setpref(STRING, "kmeleon.plugins.adblock.subscriptions", $_Adblockplugin_load ) ;
   $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock subscriptions initial load approved.");
   appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
   macros("_Adblockplugin_initial2");
-  } else {
-  $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock subscriptions initial load deferred.");
-  appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
-}
+  
 removebutton("Adblock_plugin", "macros(_Adblockplugin_toggle)" );
 # ?? remove or change?
 addbutton("Adblock_plugin", "macros(basic_ab_Dummy)", "Adblock Locus", "Adblock Locus is INACTIVE \n no rules");
@@ -448,23 +456,27 @@ if (($VERSION >= 33685507) and (pluginexist(adblock)) ) {  # K-Meleon 75.1 or gr
     setpref(BOOL, "kmeleon.plugins.adblock.log.cleared", false); 
     $_adp= "AdBlock Locus";
 	setmenu("PrivacySecurity", popup, $_adp, -1);
-    setmenu($_adp, macro, "Allow page", "_Adblockplugin_allowPage", 0);
-    setmenu($_adp, macro, "Enable Logging", "_Adblockplugin_logging", 1);
-	setmenu($_adp, separator, 2);
-    setmenu($_adp, macro, "About", "_Adblockplugin_About", 3);		
+    setmenu($_adp, macro, "Allow Domain", "_Adblockplugin_allowDomain", 0);
+    setmenu($_adp, macro, "Allow Address", "_Adblockplugin_allowAddress", 1);
+    setmenu($_adp, macro, "Restart K-Meleon", "_Adblockplugin_restart_sessions", 2);
+	setmenu($_adp, separator, 3);
+    setmenu($_adp, macro, "About", "_Adblockplugin_About", 4);		
     $_adA= "Advanced";  $_adAm= "Automatic Settings";
-    setmenu($_adp, macro, "View settings", "_Adblockplugin_QV", 4);
-    setmenu($_adp, macro, "Invert icons", "_Adblockplugin_ICONS", 5);
-	setmenu($_adp, popup, $_adA, 6);
-	setmenu($_adp, popup, $_adAm, 7);    
+    setmenu($_adp, macro, "View Settings", "_Adblockplugin_QV", 5);
+    setmenu($_adp, macro, "Custom Rules", "_Adblockplugin_rules(adblock_user)", 6);
+    setmenu($_adp, macro, "Refresh Rules", "_Adblockplugin_Refresh", 7);		
+	setmenu($_adp, popup, $_adA, 8);
+	setmenu($_adp, popup, $_adAm, 9);    
     setmenu($_adp, separator, $_adA);    
-    setmenu($_adA, macro, "List subscriptions", "_Adblockplugin_subscriptions", 0);
-    setmenu($_adA, macro, "View the rules", "_Adblockplugin_rules(adblock)", 1);
-    setmenu($_adA, macro, "Clear the rules", "_Adblockplugin_clear_rules", 2);
-    setmenu($_adA, macro, "View the log", "_Adblockplugin_logs(adblock)", 3);
-    setmenu($_adA, macro, "Clear the log", "_Adblockplugin_clear_log", 4);
+    setmenu($_adA, macro, "Enable Logging", "_Adblockplugin_logging", 0);
+    setmenu($_adA, macro, "List Subscriptions", "_Adblockplugin_subscriptions", 1);
+    setmenu($_adA, macro, "View the Rules", "_Adblockplugin_rules(adblock)", 2);
+    setmenu($_adA, macro, "Clear the Rules", "_Adblockplugin_clear_rules", 3);
+    setmenu($_adA, macro, "View the Log", "_Adblockplugin_logs(adblock)", 4);
+    setmenu($_adA, macro, "Clear the Log", "_Adblockplugin_clear_log", 5);
+    setmenu($_adA, macro, "Invert Icons", "_Adblockplugin_ICONS", 6);
 	setmenu($_adA, separator, 5);
-	setmenu($_adA, macro, "View the macro's log", "_Adblockplugin_macro_log(adblockmacro)", 6);
+	setmenu($_adA, macro, "View the Macro's Log", "_Adblockplugin_macro_log(adblockmacro)", 6);
     macros("_Adblockplugin_BuildMenuAs");	
     ## create toolbar and set button
     # check icon and set tool tip
@@ -476,11 +488,11 @@ if (($VERSION >= 33685507) and (pluginexist(adblock)) ) {  # K-Meleon 75.1 or gr
 }
 
 _Adblockplugin_BuildMenuAs {
-    setmenu($_adAm, macro, "Enable rules autodeletion", "_Adblockplugin_Aclear_rules", 0);
-    setmenu($_adAm, macro, "Set interval for rules - ".getpref(INT,"kmeleon.plugins.adblock.rules.days"), "_Adblockplugin_Aclear_rules_I", 1);
+    setmenu($_adAm, macro, "Update Rules", "_Adblockplugin_Aclear_rules", 0);
+    setmenu($_adAm, macro, "Set Interval: ".getpref(INT,"kmeleon.plugins.adblock.rules.days")." Days", "_Adblockplugin_Aclear_rules_I", 1);
     setmenu($_adAm, separator, 2);     
-    setmenu($_adAm, macro, "Enable log file autodeletion", "_Adblockplugin_Aclear_log", 3); 
-    setmenu($_adAm, macro, "Set interval for log - ".getpref(INT,"kmeleon.plugins.adblock.log.days"), "_Adblockplugin_Aclear_log_I", 4);
+    setmenu($_adAm, macro, "Clear Logs", "_Adblockplugin_Aclear_log", 3); 
+    setmenu($_adAm, macro, "Set Interval: ".getpref(INT,"kmeleon.plugins.adblock.log.days")." Days", "_Adblockplugin_Aclear_log_I", 4);
 }
 
 _Adblockplugin_toolbar_set {
@@ -508,6 +520,63 @@ if (getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared")) {
   }  
   setcmdicon("macros(basic_ab_Dummy)", $_adblockmacro_XIcon );
 }
+
+
+
+$_tool_path=getfolder(RootFolder)."\\Tools";
+$_km_path=getfolder(RootFolder)."\\k-meleon.exe";
+$_profile_path=getfolder(ProfileFolder);
+
+
+
+_Adblockplugin_restart_sessions{
+macroinfo= _("Restart K-Meleon with current session.");
+$sessdef=getpref(BOOL, "kmeleon.plugins.sessions.autoload");
+$sesstyp=getpref(STRING , "kmeleon.plugins.sessions.openStart");
+$sessprompt=getpref(BOOL, "kmeleon.plugins.sessions.ask_autoload");
+setpref(BOOL, "kmeleon.plugins.sessions.autoload", true);
+setpref(STRING , "kmeleon.plugins.sessions.openStart", "Previous Session");
+setpref(BOOL, "kmeleon.plugins.sessions.ask_autoload", false);
+setpref(BOOL, "kmeleon.extensions.restart.autoload", $sessdef);
+setpref(STRING , "kmeleon.extensions.restart.openStart", $sesstyp);
+setpref(BOOL, "kmeleon.extensions.restart.ask_autoload", $sessprompt);
+setpref(BOOL, "kmeleon.extensions.restart", true);
+exec($_tool_path."\\restartkm.exe \"".$_km_path."\" \"".$_profile_path."\"");
+id(ID_APP_EXIT);
+}
+
+
+
+_Adblockplugin_Refresh{
+macroinfo= _("Clear old rules, download new rules, and restart K-Meleon.");
+&_Adblockplugin_clear_rules;
+$_Adblock_Refresh = confirm( "To refresh adblocking rules, AdBlock Locus needs to restart K-Meleon. Are you ready to restart K-Meleon?" , _("Restart K-Meleon") , YESNO , QUESTION ); 
+if ( $_Adblock_Refresh == "YES" ) {
+&_Adblockplugin_restart_sessions;
+  } 
+  
+  else {
+alert(_("Old adblocking rules have been cleared. New rules will be available the next time you start K-Meleon."), _("Old Rules Cleared") );
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # -----------------------------------------------------------
 $OnQuit=$OnQuit."_Adblockplugin_DayCheck;";
