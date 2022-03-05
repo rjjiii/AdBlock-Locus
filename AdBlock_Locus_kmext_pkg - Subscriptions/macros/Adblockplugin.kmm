@@ -349,9 +349,11 @@ alert(_("AdBlock Locus enables access to K-Meleon's built-in adblocker. It was c
 
 AdBlock Locus has been distributed freely and is provided AS IS, WITHOUT WARRANTY OF ANY KIND. In no event shall the authors be liable for any claim, damage, or other liability.
 
-Version 0.9
+Special thanks to: Dorian, James D, Siria, Rodocop, and the K-Meleon community.
 
-© 2022, all rights reserved."),_("AdBlock Locus"));
+Version 1.0
+
+Copyright © 2022, all rights reserved."),_("AdBlock Locus 1.0"));
 }
 
 
@@ -468,15 +470,16 @@ if (($VERSION >= 33685507) and (pluginexist(adblock)) ) {  # K-Meleon 75.1 or gr
 	setmenu($_adp, popup, $_adA, 8);
 	setmenu($_adp, popup, $_adAm, 9);    
     setmenu($_adp, separator, $_adA);    
-    setmenu($_adA, macro, "Enable Logging", "_Adblockplugin_logging", 0);
-    setmenu($_adA, macro, "List Subscriptions", "_Adblockplugin_subscriptions", 1);
-    setmenu($_adA, macro, "View the Rules", "_Adblockplugin_rules(adblock)", 2);
-    setmenu($_adA, macro, "Clear the Rules", "_Adblockplugin_clear_rules", 3);
-    setmenu($_adA, macro, "View the Log", "_Adblockplugin_logs(adblock)", 4);
+    setmenu($_adA, macro, "View the Rules", "_Adblockplugin_rules(adblock)", 0);
+    setmenu($_adA, macro, "Clear the Rules", "_Adblockplugin_clear_rules", 1);
+    setmenu($_adA, macro, "List Subscriptions", "_Adblockplugin_subscriptions", 2);
+	setmenu($_adA, separator, 3);
+    setmenu($_adA, macro, "Enable Logging", "_Adblockplugin_logging", 4);
     setmenu($_adA, macro, "Clear the Log", "_Adblockplugin_clear_log", 5);
-    setmenu($_adA, macro, "Invert Icons", "_Adblockplugin_ICONS", 6);
-	setmenu($_adA, separator, 5);
-	setmenu($_adA, macro, "View the Macro's Log", "_Adblockplugin_macro_log(adblockmacro)", 6);
+    setmenu($_adA, macro, "View the Log", "_Adblockplugin_logs(adblock)", 6);
+	setmenu($_adA, macro, "View the Macro's Log", "_Adblockplugin_macro_log(adblockmacro)", 7);
+	setmenu($_adA, separator, 8);
+    setmenu($_adA, macro, "Invert Icons", "_Adblockplugin_ICONS", 9);
     macros("_Adblockplugin_BuildMenuAs");	
     ## create toolbar and set button
     # check icon and set tool tip
