@@ -11,12 +11,10 @@
 !
 ! Broken site fallback
 !
-
-||developer.mozilla.org$script
-
-
 ||weather-brokercdn.api.bbci.co.uk$script
 ||mybbc-analytics.files.bbci.co.uk$script
+
+||developer.mozilla.org$script
 
 ! Daily Mail
 ||uk-script.dotmetrics.net$script
@@ -24,6 +22,3 @@
 
 ! Newegg.com
 ||https://cdn.quadpay.com/v1/$script
-
-||https://www.myabandonware.com/$script
-||https://secure.quantserve.com$script
