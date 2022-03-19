@@ -1,17 +1,23 @@
-﻿# This macro was modified by RJJIII from the following macro by JamesD and siria:
+#                  _      _ ___ _         _     _                     
+#                 /_\  __| | _ ) |___  __| |__ | |   ___  __ _  _ ___ 
+#                / _ \/ _` | _ \ / _ \/ _| / / | |__/ _ \/ _| || (_-< 
+#               /_/ \_\__,_|___/_\___/\__|_\_\ |____\___/\__|\_,_/__/ 
+#
+# AdBlock Locus 1.1        
+# -----------------------------------------------------------------------------------
+# This macro was modified by RJJIII from the following macro by JamesD and siria:
 #
 # UTF-8  K-Meleon Macros (http://kmeleon.sourceforge.net/wiki/index.php?id=MacroLanguage2)
 #
-# ---------- Adblockplugin.kmm  /  creates a menu + button (K-Meleon adblock plugin controls)
+# ---------- Adblockplugin.kmm / button for the BAB / AdBlock Locus component
 #
-# Version : 2.9  2022-05-02  (macro by JamesD, v2.8 tiny bugfix by siria moved last 
+# Version : 3.0  3/18/2022  (macro by JamesD, v2.8 tiny bugfix by siria moved last 
 #	setcmdicon line for button pic, additional modification by RJJIII to package with
 #	K-Meleon 76.x as part of AdBlock Locus)
 # KM forum : http://kmeleonbrowser.org/forum/read.php?9,135175
-# KM forum : http://kmeleonbrowser.org/forum/read.php?9,135175
+# KM forum : 
+
 # Dependencies :  K-Meleon/kplugins/adblock.dll   (or move into profile, create kplugins folder)
-# Rules list:     Create adblock.txt in profile folder and edit it manually.  Changes need restart.  
-# Rules list from web:  https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/adblock.txt
 # Preferences : Web list URL in "kmeleon.plugins.adblock.subscriptions" 
 #   (plugin)          "kmeleon.plugins.adblock.logging", "kmeleon.plugins.adblock.disabled",
 # Preferences       : "kmeleon.plugins.adblock.rules.auto", "kmeleon.plugins.adblock.log.auto", 
@@ -20,8 +26,6 @@
 #                     "kmeleon.plugins.adblock.rules.cleared", "kmeleon.plugins.adblock.log.cleared"
 #                     "kmeleon.plugins.adblock.icons.alternate"
 # Files             : adblock.txt, adblock.log, adblockmacro.log  ( in the profile )
-# -----------------------------------------------------------------------------------
-# Optional: additional little helper macro:  http://kmeleonbrowser.org/forum/read.php?9,145345
 # -----------------------------------------------------------------------------------
 
 _Adblockplugin_disable {
@@ -33,7 +37,7 @@ macros("_Adblockplugin_toggle");
 _Adblockplugin_subscriptions {
 macroinfo=_("View the list of subscriptions.");
 $_Adblockplugin_sources  = getpref( STRING, "kmeleon.plugins.adblock.subscriptions") ; 
-$_Adblockplugin_sources = sub( "|", "\n\n", $_Adblockplugin_sources );
+$_Adblockplugin_sources = gsub( "|", "\n\n", $_Adblockplugin_sources );
 alert($_Adblockplugin_sources, _("Subscriptions"), INFO);
 }
 
@@ -62,6 +66,33 @@ if ($__data=="") {&_Adblockplugin_FileNotFoundRules;
  exec(sub("%1",$__path,$cmdline));
  }
 }
+
+#I want to create a similar placeholder text file where I can make a message including, how the BAB works, copy/paste, nuke, etc.
+_Adblockplugin_user_rules {
+macroinfo=_("Open the rules in a text editor.");
+menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");
+$__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
+$__data=readfile($__path);
+if ($__data=="") {&_Adblockplugin_FileNotFoundUserRules;
+ } else {
+ $ext="txt"; &getSecureExtensionHandler;
+ exec(sub("%1",$__path,$cmdline));
+ }
+}
+
+_Adblockplugin_FileNotFoundUserRules{
+$_file=getfolder(ProfileFolder)."\\adblock_user.txt";
+$_x=appendfile($_file, "! AdBlock Locus custom rules subscription");
+$__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
+$__data=readfile($__path);
+if ($__data=="") {&_Adblockplugin_FileNotFound;
+ } else {
+ $ext="txt"; &getSecureExtensionHandler;
+ exec(sub("%1",$__path,$cmdline));
+ }
+}
+
+
 
 _Adblockplugin_logs {
 macroinfo=_("Open the log file (adblock.log) in a text editor.");
@@ -353,14 +384,14 @@ Special thanks to: Dorian, James D, Siria, Rodocop, and the K-Meleon community.
 
 Version 1.0
 
-Copyright © 2022, all rights reserved."),_("AdBlock Locus 1.0"));
+Copyright © 2022, all rights reserved."),_("AdBlock Locus 1.0"), INFO);
 }
 
 
 
 _Adblockplugin_FileNotFoundRules{
 $_file=getfolder(ProfileFolder)."\\adblock.txt";
-$_x=appendfile($_file, "! No rules were found. If this your first time running AdBlock Locus, clear the rules and restart K-Meleon. Any rules you add to this text file will take effect the next time you start K-Meleon. You can use the rules from an AdBlock Plus installation's patterns.ini, you can create your own rules manually using AdBlock Plus syntax, you can use a subscription, or you can generate a blocklist from a macro like nukeimage2adblockBAB. If you have an adblock.txt list of rules in another folder, you can copy and paste them into this document.");
+$_x=appendfile($_file, "! No rules were found. If this is your first time running AdBlock Locus, choose "Refresh Rules" from the AdBlock Locus menu to download subscriptions and start blocking ads.");
 $__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
 $__data=readfile($__path);
 if ($__data=="") {&_Adblockplugin_FileNotFound;
@@ -445,11 +476,13 @@ $__adbdisabled ? $__adbdisabled = _("DISABLED") : $__adbdisabled = _("ENABLED");
 $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Ad blocking is ").$__adbdisabled._(" by user.");
 appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
 statusbar(_("Ad blocking is ").$__adbdisabled);
+&_ABL_Sync_PrivacyBar;
 }
 
 _Adblockplugin_BuildMenu {
 if (($VERSION >= 33685507) and (pluginexist(adblock)) ) {  # K-Meleon 75.1 or greater and adblock plugin
     ## DO NOT set rules cleared to false if adblock.txt contains dummy string
+	$_BABmacro_path = getfolder(ProfileFolder)."\\adblockmacro.log";
     $_Adblockplugin_IcoChg = false;
     $__path=getfolder(ProfileFolder)."\\adblock.txt";
     if ( readfile($__path) != "[BASIC ADBLOCK]\n!dummy for offline hold" )  {
@@ -465,7 +498,7 @@ if (($VERSION >= 33685507) and (pluginexist(adblock)) ) {  # K-Meleon 75.1 or gr
     setmenu($_adp, macro, "About", "_Adblockplugin_About", 4);		
     $_adA= "Advanced";  $_adAm= "Automatic Settings";
     setmenu($_adp, macro, "View Settings", "_Adblockplugin_QV", 5);
-    setmenu($_adp, macro, "Custom Rules", "_Adblockplugin_rules(adblock_user)", 6);
+    setmenu($_adp, macro, "Custom Rules", "_Adblockplugin_user_rules(adblock_user)", 6);
     setmenu($_adp, macro, "Refresh Rules", "_Adblockplugin_Refresh", 7);		
 	setmenu($_adp, popup, $_adA, 8);
 	setmenu($_adp, popup, $_adAm, 9);    
@@ -566,8 +599,16 @@ alert(_("Old adblocking rules have been cleared. New rules will be available the
 }
 
 
-
-
+# Privacy Bar option
+# Add the below entry to "toolsbar.cfg" to block ads from the Privacy Bar
+#	!Ads{
+#	macros(_Adblockplugin_toggle)|&Privacy
+#	Block ads with K-Meleon's built-in ad blocker.
+#	check.png[0,32,32]
+#	}
+_ABL_Sync_PrivacyBar{
+pluginmsg(toolbars,"CheckButton","&Privacy Bar".",macros(_Adblockplugin_toggle),".(!getpref(BOOL,"kmeleon.plugins.adblock.disabled")?1:0));
+}
 
 
 
@@ -586,3 +627,4 @@ $OnQuit=$OnQuit."_Adblockplugin_DayCheck;";
 $OnSetup=$OnSetup."_Adblockplugin_initial;";
 $OnInit=$OnInit."_Adblockplugin_BuildMenu;";
 $macroModules=$macroModules."Adblockplugin;";
+$OnLoad=$OnLoad."_ABL_Sync_PrivacyBar;";
