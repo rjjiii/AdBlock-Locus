@@ -3,7 +3,7 @@
 #                / _ \/ _` | _ \ / _ \/ _| / / | |__/ _ \/ _| || (_-< 
 #               /_/ \_\__,_|___/_\___/\__|_\_\ |____\___/\__|\_,_/__/ 
 #
-# AdBlock Locus 1.1        
+# AdBlock Locus 1.2        
 # -----------------------------------------------------------------------------------
 # This macro was modified by RJJIII from the following macro by JamesD and siria:
 #
@@ -592,9 +592,28 @@ if ( $_Adblock_Refresh == "YES" ) {
   else {
 alert(_("Old adblocking rules have been cleared. New rules will be available the next time you start K-Meleon."), _("Old Rules Cleared") );
 }
-
-
 }
+
+
+
+restartcheck{
+$restartact=getpref(BOOL, "kmeleon.extensions.restart");
+$restactive=("true");
+$restartact==$restactive?&restoreuserses:0;
+}
+
+
+restoreuserses{
+setpref(BOOL, "kmeleon.extensions.restart", false);
+$sessdef=getpref(BOOL, "kmeleon.extensions.restart.autoload");
+$sesstyp=getpref(STRING, "kmeleon.extensions.restart.openStart");
+$sessprompt=getpref(BOOL, "kmeleon.extensions.restart.ask_autoload");
+setpref(BOOL, "kmeleon.plugins.sessions.autoload", $sessdef);
+setpref(STRING , "kmeleon.plugins.sessions.openStart", $sesstyp);
+setpref(BOOL, "kmeleon.plugins.sessions.ask_autoload", $sessprompt);
+}
+
+
 
 
 # Privacy Bar option
@@ -623,6 +642,7 @@ pluginmsg(toolbars,"CheckButton","&Privacy Bar".",macros(_Adblockplugin_toggle),
 # -----------------------------------------------------------
 $OnQuit=$OnQuit."_Adblockplugin_DayCheck;";
 $OnSetup=$OnSetup."_Adblockplugin_initial;";
+$OnStartup=$OnStartup."restartcheck;";
 $OnInit=$OnInit."_Adblockplugin_BuildMenu;";
 $macroModules=$macroModules."Adblockplugin;";
 $OnLoad=$OnLoad."_ABL_Sync_PrivacyBar;";
