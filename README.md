@@ -4,7 +4,7 @@ K-Meleon is a privacy-focused web browser that comes with a built-in adblocker (
 AdBlock Locus (ABL) provides a graphical interface to toggle the BAB, create custom rules, manage subscriptions, and create exceptions. K-Meleon 76.X.G comes with the BAB already installed. If you are using K-Meleon 75.1 or the version 76 release candidate, you will need to 
 [download the BAB for older versions of K-Meleon](http://kmeleonbrowser.org/forum/read.php?9,135175) first. 
 
-**[Download AdBlock Locus](https://github.com/rjjiii/AdBlock-Locus/releases/download/v1.0/AdBlock_Locus_kmext_pkg.7z)**
+**[Download AdBlock Locus](https://github.com/rjjiii/AdBlock-Locus/raw/main/AdBlock_Locus_kmext_pkg.7z)**
 
 ## Install ##
 To install AdBlock Locus on K-Meleon:
