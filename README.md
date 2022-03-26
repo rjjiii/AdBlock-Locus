@@ -4,13 +4,13 @@ K-Meleon is a privacy-focused web browser that comes with a built-in adblocker (
 AdBlock Locus (ABL) provides a graphical interface to toggle the BAB, create custom rules, manage subscriptions, and create exceptions. K-Meleon 76.X.G comes with the BAB already installed. If you are using K-Meleon 75.1 or the version 76 release candidate, you will need to 
 [download the BAB for older versions of K-Meleon](http://kmeleonbrowser.org/forum/read.php?9,135175) first. 
 
-**[Download AdBlock Locus](https://github.com/rjjiii/AdBlock-Locus/raw/main/AdBlock_Locus_kmext_pkg.7z)**
+**[Download AdBlock Locus](https://github.com/rjjiii/AdBlock-Locus/releases/download/v1.2.1/AdBlock_Locus_kmext_pkg.7z)**
 
 ## Install ##
 To install AdBlock Locus on K-Meleon:
 1. First make sure that you have the BAB turned on by going to Preferences (F2) - K-Meleon Plugins and checking adblock. If you don't see adblock listed with your Kplugins, [download the BAB](http://kmeleonbrowser.org/forum/read.php?9,135175) first.
 2. Install the K-Meleon Extension Manager. You can download it here ( http://kmext.sourceforge.net/kem.htm ). Follow the instructions on the site.
-3. [Download the latest version](https://github.com/rjjiii/AdBlock-Classic/releases/download/v1.0.5.2/AdBlock_Classic_kmext_pkg.7z) of AdBlock Locus.
+3. [Download the latest version](https://github.com/rjjiii/AdBlock-Locus/releases/download/v1.2.1/AdBlock_Locus_kmext_pkg.7z) of AdBlock Locus.
 4. In K-Meleon, go to Tools - Extension Manager.
 5. Click the Run Installer button. A file dialog will open. Browse to the 7z file.
 6. K-Meleon will automatically restart and adblocking rules will download, but won't take affect yet.
