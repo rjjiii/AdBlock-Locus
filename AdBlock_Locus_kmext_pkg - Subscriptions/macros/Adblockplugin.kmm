@@ -392,7 +392,7 @@ togglepref(BOOL, "kmeleon.plugins.adblock.subs.core");
 }
 
 _Adblockplugin_Sub_Fallback {
-macroinfo= _("Disable Javascript of some sites incompatible with K-Meleon.");
+macroinfo= _("Disable Javascript on some sites incompatible with K-Meleon.");
 menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.fallback");
 togglepref(BOOL, "kmeleon.plugins.adblock.subs.fallback");
 }
@@ -404,6 +404,7 @@ togglepref(BOOL, "kmeleon.plugins.adblock.subs.easylist");
 }
 
 _Adblockplugin_Sub_Custom {
+macroinfo= _("Add the URL for an additional subscription.");
 menuchecked=getpref(BOOL,"kmeleon.plugins.adblock.subs.customcheck");
 $_Adblockplugin_Custom_Input="";
 $_Adblockplugin_Custom_Input=$_Adblockplugin_Custom_Input.getpref(STRING,"kmeleon.plugins.adblock.subs.custom");
@@ -430,10 +431,7 @@ setpref(BOOL,"kmeleon.plugins.adblock.subs.customcheck",false);
 
 
 _Adblockplugin_Sub_Set {
-macroinfo= _("Display information, version number, and copyright for AdBlock Locus.");
-$_Adblockplugin_usersub=getfolder(ProfileFolder)."\\adblock_user.txt";
-$_Adblockplugin_usersub="file:///".gsub("\\","/",$_Adblockplugin_usersub);
-$_Adblockplugin_NewSubs = $_Adblockplugin_usersub."|";
+macroinfo= _("Set the above subscriptions to download on next refresh.");
 
 if(getpref(BOOL, "kmeleon.plugins.adblock.subs.easylist"))
 {$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://easylist.to/easylist/easylist.txt|";}
@@ -442,7 +440,11 @@ if(getpref(BOOL, "kmeleon.plugins.adblock.subs.core"))
 {$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Core.txt|";}
 
 if(getpref(BOOL, "kmeleon.plugins.adblock.subs.fallback"))
-{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Fallback.txt";}
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Fallback.txt|";}
+
+$_Adblockplugin_usersub=getfolder(ProfileFolder)."\\adblock_user.txt";
+$_Adblockplugin_usersub="file:///".gsub("\\","/",$_Adblockplugin_usersub);
+$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs.$_Adblockplugin_usersub."|";
 
 $_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."|".getpref(STRING, "kmeleon.plugins.adblock.subs.custom");
 
@@ -529,6 +531,8 @@ _Adblockplugin_initial_load {
   $_Adblockplugin_load = $_Adblockplugin_load ."|".   $_Adblockplugin_usersub ;   
 
   setpref(STRING, "kmeleon.plugins.adblock.subscriptions", $_Adblockplugin_load ) ;
+  setpref(BOOL, "kmeleon.plugins.adblock.subs.core", true);
+  setpref(BOOL, "kmeleon.plugins.adblock.subs.fallback", true);
   $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock subscriptions initial load approved.");
   appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
   macros("_Adblockplugin_initial2");
