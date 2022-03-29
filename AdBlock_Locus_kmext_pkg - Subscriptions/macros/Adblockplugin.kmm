@@ -3,7 +3,7 @@
 #                / _ \/ _` | _ \ / _ \/ _| / / | |__/ _ \/ _| || (_-< 
 #               /_/ \_\__,_|___/_\___/\__|_\_\ |____\___/\__|\_,_/__/ 
 #
-# AdBlock Locus 1.2        
+# AdBlock Locus 1.3        
 # -----------------------------------------------------------------------------------
 # This macro was modified by RJJIII from the following macro by JamesD and siria:
 #
@@ -380,10 +380,82 @@ AdBlock Locus has been distributed freely and is provided AS IS, WITHOUT WARRANT
 
 Special thanks to: Dorian, James D, Siria, Rodocop, and the K-Meleon community.
 
-Version 1.0
+Version 1.3
 
 Copyright © 2022, all rights reserved."),_("AdBlock Locus 1.0"), INFO);
 }
+
+_Adblockplugin_Sub_Core {
+macroinfo= _("A lightweight block list for AdBlock Locus.");
+menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.core");
+togglepref(BOOL, "kmeleon.plugins.adblock.subs.core");
+}
+
+_Adblockplugin_Sub_Fallback {
+macroinfo= _("Disable Javascript of some sites incompatible with K-Meleon.");
+menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.fallback");
+togglepref(BOOL, "kmeleon.plugins.adblock.subs.fallback");
+}
+
+_Adblockplugin_Sub_Easylist {
+macroinfo= _("A popular blocklist often used with ABP.");
+menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.easylist");
+togglepref(BOOL, "kmeleon.plugins.adblock.subs.easylist");
+}
+
+_Adblockplugin_Sub_Custom {
+menuchecked=getpref(BOOL,"kmeleon.plugins.adblock.subs.customcheck");
+$_Adblockplugin_Custom_Input="";
+$_Adblockplugin_Custom_Input=$_Adblockplugin_Custom_Input.getpref(STRING,"kmeleon.plugins.adblock.subs.custom");
+$_Adblockplugin_Custom_Input=prompt("Copy and paste a subscription URL below.","Custom subscription", $_Adblockplugin_Custom_Input);
+
+if($_Adblockplugin_Custom_Input!="")
+{setpref(STRING, "kmeleon.plugins.adblock.subs.custom", $_Adblockplugin_Custom_Input);
+&_Adblockplugin_Sub_Custom_Check;
+alert(_("Your custom subscription has been updated to:\n\n".$_Adblockplugin_Custom_Input."\n\nSet your subscriptions and refresh AdBlock Locus to use the new blocklist."),_("Custom Subscription"), INFO);}
+else{
+&_Adblockplugin_Sub_Custom_Check;
+alert(_("Your custom subscription below was unchanged:\n\n".getpref(STRING, "kmeleon.plugins.adblock.subs.custom")),_("Custom Subscription"), INFO);}
+}
+
+_Adblockplugin_Sub_Custom_Check {
+$_Adblockplugin_Check=getpref(STRING, "kmeleon.plugins.adblock.subs.custom");
+if(length($_Adblockplugin_Check)>7)
+{setpref(BOOL,"kmeleon.plugins.adblock.subs.customcheck",true);}
+else{
+setpref(BOOL,"kmeleon.plugins.adblock.subs.customcheck",false);
+}
+
+}
+
+
+_Adblockplugin_Sub_Set {
+macroinfo= _("Display information, version number, and copyright for AdBlock Locus.");
+$_Adblockplugin_usersub=getfolder(ProfileFolder)."\\adblock_user.txt";
+$_Adblockplugin_usersub="file:///".gsub("\\","/",$_Adblockplugin_usersub);
+$_Adblockplugin_NewSubs = $_Adblockplugin_usersub."|";
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.easylist"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://easylist.to/easylist/easylist.txt|";}
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.core"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Core.txt|";}
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.fallback"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Fallback.txt";}
+
+$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."|".getpref(STRING, "kmeleon.plugins.adblock.subs.custom");
+
+$_Adblockplugin_Alert ="";
+$_Adblockplugin_Alert=$_Adblockplugin_NewSubs;
+setpref(STRING, "kmeleon.plugins.adblock.subscriptions", $_Adblockplugin_Alert ) ;
+&_Adblockplugin_subscriptions;
+}
+
+
+
+_Adblockplugin_Sub_Check {}
+
 
 
 
@@ -495,12 +567,13 @@ if (($VERSION >= 33685507) and (pluginexist(adblock)) ) {  # K-Meleon 75.1 or gr
     setmenu($_adp, macro, "Restart K-Meleon", "_Adblockplugin_restart_sessions", 2);
 	setmenu($_adp, separator, 3);
     setmenu($_adp, macro, "About", "_Adblockplugin_About", 4);		
-    $_adA= "Advanced";  $_adAm= "Automatic Settings";
+    $_adA= "Advanced";  $_adAm= "Automatic Settings"; $_adSub= "Subscriptions";
     setmenu($_adp, macro, "View Settings", "_Adblockplugin_QV", 5);
     setmenu($_adp, macro, "Custom Rules", "_Adblockplugin_user_rules(adblock_user)", 6);
     setmenu($_adp, macro, "Refresh Rules", "_Adblockplugin_Refresh", 7);		
 	setmenu($_adp, popup, $_adA, 8);
-	setmenu($_adp, popup, $_adAm, 9);    
+	setmenu($_adp, popup, $_adAm, 9);   
+	setmenu($_adp, popup, $_adSub, 10);	
     setmenu($_adp, separator, $_adA);    
     setmenu($_adA, macro, "View the Rules", "_Adblockplugin_rules(adblock)", 0);
     setmenu($_adA, macro, "Clear the Rules", "_Adblockplugin_clear_rules", 1);
@@ -523,11 +596,19 @@ if (($VERSION >= 33685507) and (pluginexist(adblock)) ) {  # K-Meleon 75.1 or gr
 }
 
 _Adblockplugin_BuildMenuAs {
+#Automatic settings menu
     setmenu($_adAm, macro, "Update Rules", "_Adblockplugin_Aclear_rules", 0);
     setmenu($_adAm, macro, "Set Interval: ".getpref(INT,"kmeleon.plugins.adblock.rules.days")." Days", "_Adblockplugin_Aclear_rules_I", 1);
     setmenu($_adAm, separator, 2);     
     setmenu($_adAm, macro, "Clear Logs", "_Adblockplugin_Aclear_log", 3); 
     setmenu($_adAm, macro, "Set Interval: ".getpref(INT,"kmeleon.plugins.adblock.log.days")." Days", "_Adblockplugin_Aclear_log_I", 4);
+# Subscriptions menu
+    setmenu($_adSub, macro, "Core", "_Adblockplugin_Sub_Core", 0);		
+    setmenu($_adSub, macro, "Fallback", "_Adblockplugin_Sub_Fallback", 1);		
+    setmenu($_adSub, macro, "Easylist (ABP)", "_Adblockplugin_Sub_Easylist", 2);		
+    setmenu($_adSub, macro, "Custom", "_Adblockplugin_Sub_Custom", 3);		
+    setmenu($_adSub, separator, 4);     
+    setmenu($_adSub, macro, "Set", "_Adblockplugin_Sub_Set", 5);		
 }
 
 _Adblockplugin_toolbar_set {
