@@ -703,7 +703,7 @@ setpref(BOOL, "kmeleon.plugins.sessions.ask_autoload", $sessprompt);
 
 
 # Privacy Bar option
-# Add the below entry to "toolsbar.cfg" to block ads from the Privacy Bar
+# Add the below entry to "toolbars.cfg" to block ads from the Privacy Bar
 #	!Ads{
 #	macros(_Adblockplugin_toggle)|&Privacy
 #	Block ads with K-Meleon's built-in ad blocker.
