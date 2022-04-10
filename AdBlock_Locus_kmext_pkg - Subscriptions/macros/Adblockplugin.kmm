@@ -3,7 +3,7 @@
 #                / _ \/ _` | _ \ / _ \/ _| / / | |__/ _ \/ _| || (_-< 
 #               /_/ \_\__,_|___/_\___/\__|_\_\ |____\___/\__|\_,_/__/ 
 #
-# AdBlock Locus 1.3        
+# AdBlock Locus 1.3.1        
 # -----------------------------------------------------------------------------------
 # This macro was modified by RJJIII from the following macro by JamesD and siria:
 #
@@ -386,21 +386,27 @@ Copyright © 2022, all rights reserved."),_("AdBlock Locus 1.0"), INFO);
 }
 
 _Adblockplugin_Sub_Core {
-macroinfo= _("A lightweight block list for AdBlock Locus.");
+macroinfo= _("A lightweight block list for AdBlock Locus. *Recommended Base*");
 menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.core");
 togglepref(BOOL, "kmeleon.plugins.adblock.subs.core");
+}
+
+_Adblockplugin_Sub_Easylist {
+macroinfo= _("A popular blocklist often used with AdBlock Plus. A heavier alternative to AdBlock Locus Core.");
+menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.easylist");
+togglepref(BOOL, "kmeleon.plugins.adblock.subs.easylist");
+}
+
+_Adblockplugin_Sub_Sup {
+macroinfo= _("Supplemental subscription.");
+menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.".$ARG);
+togglepref(BOOL, "kmeleon.plugins.adblock.subs.".$ARG);
 }
 
 _Adblockplugin_Sub_Fallback {
 macroinfo= _("Disable Javascript on some sites incompatible with K-Meleon.");
 menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.fallback");
 togglepref(BOOL, "kmeleon.plugins.adblock.subs.fallback");
-}
-
-_Adblockplugin_Sub_Easylist {
-macroinfo= _("A popular blocklist often used with ABP.");
-menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.easylist");
-togglepref(BOOL, "kmeleon.plugins.adblock.subs.easylist");
 }
 
 _Adblockplugin_Sub_Custom {
@@ -432,15 +438,40 @@ setpref(BOOL,"kmeleon.plugins.adblock.subs.customcheck",false);
 
 _Adblockplugin_Sub_Set {
 macroinfo= _("Set the above subscriptions to download on next refresh.");
-
-if(getpref(BOOL, "kmeleon.plugins.adblock.subs.easylist"))
-{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://easylist.to/easylist/easylist.txt|";}
+$_Adblockplugin_NewSubs="";
 
 if(getpref(BOOL, "kmeleon.plugins.adblock.subs.core"))
 {$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Core.txt|";}
 
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.easylist"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://easylist-downloads.adblockplus.org/easylist_noelemhide.txt|";}
+
 if(getpref(BOOL, "kmeleon.plugins.adblock.subs.fallback"))
 {$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://raw.githubusercontent.com/rjjiii/AdBlock-Locus/main/AdBlockLocus_Fallback.txt|";}
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.french"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://filters.adtidy.org/extension/ublock/filters/113_optimized.txt|";}
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.spanish"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://filters.adtidy.org/extension/ublock/filters/9_optimized.txt|";}
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.german"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://filters.adtidy.org/extension/ublock/filters/107_optimized.txt|";}
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.chinese"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://filters.adtidy.org/extension/ublock/filters/104_optimized.txt|";}
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.russian"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://filters.adtidy.org/extension/ublock/filters/1_optimized.txt|";}
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.cntblock"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://easylist-downloads.adblockplus.org/cntblock.txt|";}
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.privacy"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://filters.adtidy.org/extension/ublock/filters/118_optimized.txt|";}
+
+if(getpref(BOOL, "kmeleon.plugins.adblock.subs.facebook"))
+{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://secure.fanboy.co.nz/fanboy-antifacebook.txt|";}
 
 $_Adblockplugin_usersub=getfolder(ProfileFolder)."\\adblock_user.txt";
 $_Adblockplugin_usersub="file:///".gsub("\\","/",$_Adblockplugin_usersub);
@@ -453,12 +484,6 @@ $_Adblockplugin_Alert=$_Adblockplugin_NewSubs;
 setpref(STRING, "kmeleon.plugins.adblock.subscriptions", $_Adblockplugin_Alert ) ;
 &_Adblockplugin_subscriptions;
 }
-
-
-
-_Adblockplugin_Sub_Check {}
-
-
 
 
 _Adblockplugin_FileNotFoundRules{
@@ -608,11 +633,25 @@ _Adblockplugin_BuildMenuAs {
     setmenu($_adAm, macro, "Set Interval: ".getpref(INT,"kmeleon.plugins.adblock.log.days")." Days", "_Adblockplugin_Aclear_log_I", 4);
 # Subscriptions menu
     setmenu($_adSub, macro, "Core", "_Adblockplugin_Sub_Core", 0);		
-    setmenu($_adSub, macro, "Fallback", "_Adblockplugin_Sub_Fallback", 1);		
-    setmenu($_adSub, macro, "Easylist (ABP)", "_Adblockplugin_Sub_Easylist", 2);		
-    setmenu($_adSub, macro, "Custom", "_Adblockplugin_Sub_Custom", 3);		
-    setmenu($_adSub, separator, 4);     
-    setmenu($_adSub, macro, "Set", "_Adblockplugin_Sub_Set", 5);		
+    setmenu($_adSub, macro, "Easylist (ABP)", "_Adblockplugin_Sub_Easylist", 1);
+    setmenu($_adSub, separator, 2);     
+	$_adSupp = "Supplemental";
+	setmenu($_adSub, popup, $_adSupp, 3);		
+    setmenu($_adSub, macro, "Custom", "_Adblockplugin_Sub_Custom", 4);		
+    setmenu($_adSub, separator, 5);     
+    setmenu($_adSub, macro, "Set Subscriptions", "_Adblockplugin_Sub_Set", 6);
+# Supplemental subscriptions
+    setmenu($_adSupp, macro, "Français", "_Adblockplugin_Sub_Sup(french)", -1);			
+    setmenu($_adSupp, macro, "Español", "_Adblockplugin_Sub_Sup(spanish)", -1);			
+    setmenu($_adSupp, macro, "Deutsch", "_Adblockplugin_Sub_Sup(german)", -1);			
+    setmenu($_adSupp, macro, "Chinese", "_Adblockplugin_Sub_Sup(chinese)", -1);			
+    setmenu($_adSupp, macro, "Italiano", "_Adblockplugin_Sub_Sup(italian)", -1);			
+    setmenu($_adSupp, macro, "Russian", "_Adblockplugin_Sub_Sup(russian)", -1);			
+    setmenu($_adSupp, macro, "- RU AdList: Counters", "_Adblockplugin_Sub_Sup(cntblock)", -1);	
+    setmenu($_adSupp, separator, -1);     	
+    setmenu($_adSupp, macro, "EasyPrivacy (Optimized)", "_Adblockplugin_Sub_Sup(privacy)", -1);			
+    setmenu($_adSupp, macro, "Anti-Facebook", "_Adblockplugin_Sub_Sup(facebook)", -1);			
+    setmenu($_adSupp, macro, "Fallback", "_Adblockplugin_Sub_Fallback", -1);			
 }
 
 _Adblockplugin_toolbar_set {
