@@ -1,4 +1,4 @@
-![Adblock Plus 2.0]
+[Adblock Plus 2.0]
 ! Checksum: 5zEV8Ron7ij012YcOw/i0w
 ! Title: EasyList (Optimized)
 ! Description: EasyList is the primary subscription that removes adverts from web pages in English. Already included in AdGuard Base filter.
