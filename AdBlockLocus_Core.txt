@@ -1,10 +1,13 @@
 [Adblock Plus 2.0]
-! Checksum: 5zEV8Ron7ij012YcOw/i0w
-! Title: EasyList (Optimized)
-! Description: EasyList is the primary subscription that removes adverts from web pages in English. Already included in AdGuard Base filter.
-! Version: 2.0.87.55
-! TimeUpdated: 2022-04-24T01:00:19+00:00
-! Expires: 4 days (update frequency)
+! Version: 20220424
+! Title: AdBlock Locus Core
+! Last modified: 4/24/2022
+! Expires: 33 days (update frequency)
+! Homepage: https://github.com/rjjiii/AdBlock-Locus
+! Licence: https://www.gnu.org/licenses/gpl-3.0.en.html
+! Rules below were written by The EasyList authors (https://easylist.to/)
+! optimized by AdGuard Software Limited and used under the GPL 3.0.
+!
 &action=getads&
 &ad_code=
 &ad_height=
