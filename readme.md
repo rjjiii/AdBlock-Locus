@@ -4,8 +4,6 @@ K-Meleon is a privacy-focused web browser that comes with a built-in ad blocker.
 ## Installation
 To install AdBlock Locus:
 
-https://github.com/rjjiii/AdBlock-Locus/releases/download/v2.0/Adblockplugin.kmm
-
 1. Download the AdBlock Locus K-Meleon macro module (.kmm) above.
 2. Move **Adblockplugin.kmm** to your **K-Meleon/macros** folder or your **/profiles/your.profile/macros/** folder. The entire extension is stored in this single .kmm file.
 3. **Restart** K-Meleon.
@@ -58,7 +56,7 @@ A: AdBlock Locus only operates the built-in ad blocker. If the BAB doesn't suppo
 AdBlock Locus is a package containing several parts that can work together or be used separately. The individual components of the package each have different licensing situations:
 
 - The AdBlock Locus subscriptions (**Core and Fallback**) are both available under the General Public License (GPL) 3.0. They can be used with K-Meleon's Built-in Ad Blocker, AdBlock Classic, or any ad-blocking software that supports ABP rule syntax. The **AdBlock Locus icons** are based on assets from Lim Chee Aun's Phoenity and also available under the GPL. See the GPL 3.0 section below for details.
-- Both macros are made freely available, without warranty, on an as-is basis. They include code from JamesD with an implicit license grant only, and therefore cannot be re-licensed under an OSI-approved license.
+- The macro is made freely available, without warranty, on an as-is basis. It includes code from JamesD with an implicit license grant only, and therefore cannot be re-licensed under an OSI-approved license.
 
 ### GPL 3.0
 
