@@ -4,6 +4,8 @@ K-Meleon is a privacy-focused web browser that comes with a built-in ad blocker.
 ## Installation
 To install AdBlock Locus:
 
+https://github.com/rjjiii/AdBlock-Locus/releases/download/v2.0/Adblockplugin.kmm
+
 1. Download the AdBlock Locus K-Meleon macro module (.kmm) above.
 2. Move **Adblockplugin.kmm** to your **K-Meleon/macros** folder or your **/profiles/your.profile/macros/** folder. The entire extension is stored in this single .kmm file.
 3. **Restart** K-Meleon.
@@ -34,7 +36,7 @@ A: You can allow all sites, by temporarily toggling the ad blocker off. You can 
 
 A: Yes. If you set up the BAB with AdBlock Locus and then uninstall the extension, you will still have the built-in blocking abilities. You can manually toggle the ad blocker from the "Kplugins" preferences panel. You will still have the AdBlock Locus subscriptions set up and can manually refresh them by deleting "adblock.txt" in your profile and restarting K-Meleon. 
 
-### Q:Can I just use K-Meleon's Privacy Bar to toggle ad-blocking?
+### Q: Can I just use K-Meleon's Privacy Bar to toggle ad-blocking?
 
 A: Yes, after you install AdBlock Locus. If you're using K-Meleon's Default theme or another new-style theme:
 1. Select **Edit > Configuration > Toolbars** in the menu to open your configuration file. **Save an exact copy** of this file to your profile folder or your skin's folder. Don't save modification's here.
