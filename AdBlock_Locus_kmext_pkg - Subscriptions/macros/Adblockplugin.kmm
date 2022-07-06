@@ -1,37 +1,57 @@
-﻿# AdBlock Locus 1.4.0
+﻿# -----------------------------------------------------------------------------------
+# AdBlock Locus 2.0
 # -----------------------------------------------------------------------------------
-# This macro was modified by RJJIII from the following macro by JamesD and siria:
-# http://kmeleonbrowser.org/forum/read.php?9,135175
-# It is distributed as part of the AdBlock Locus package.
 #
-# UTF-8  K-Meleon Macros (http://kmeleon.sourceforge.net/wiki/index.php?id=MacroLanguage2)
+# AdBlock Locus provides a graphical user interface or GUI for K-Meleon's built-in 
+# adblocking (BAB) features. All of the BAB's blocking abilities are handled by the
+# "adblock.dll" Kplugin. AdBlock Locus provides menus, buttons, and preference 
+# dialogs to set up the BAB. It defaults to a custom blocklist designed specifically
+# for K-Meleon around the limitations of the BAB.
 #
-# ---------- Adblockplugin.kmm / button for the BAB / AdBlock Locus component -------
+# -----------------------------------------------------------------------------------
 #
-# KM forum : 		http://kmeleonbrowser.org/forum/read.php?19,156032
-# Website:			https://rjjiii.github.io/K-Meleon/AdBlockLocus/
-# Dependencies :  	K-Meleon/kplugins/adblock.dll
-# Preferences : 	Web list URL in "kmeleon.plugins.adblock.subscriptions" 
-#   (plugin)          "kmeleon.plugins.adblock.logging", "kmeleon.plugins.adblock.disabled",
-# Preferences       : "kmeleon.plugins.adblock.rules.auto", "kmeleon.plugins.adblock.log.auto", 
-#   (macro)           "kmeleon.plugins.adblock.rules.days", "kmeleon.plugins.adblock.log.days",
+# KM forum: 		  http://kmeleonbrowser.org/forum/read.php?19,156032
+# Website:			  https://rjjiii.github.io/K-Meleon/AdBlockLocus/
+# Dependencies:		  K-Meleon/kplugins/adblock.dll
+# Preferences:		  "kmeleon.plugins.adblock.subscriptions" (list of URLs for rules)
+#	(plugin)          "kmeleon.plugins.adblock.logging", "kmeleon.plugins.adblock.disabled",
+# Preferences:		  "kmeleon.plugins.adblock.rules.auto", "kmeleon.plugins.adblock.log.auto", 
+# 	(macro)           "kmeleon.plugins.adblock.rules.days", "kmeleon.plugins.adblock.log.days",
 #                     "kmeleon.plugins.adblock.rules.next", "kmeleon.plugins.adblock.log.next",
-#                     "kmeleon.plugins.adblock.rules.cleared", "kmeleon.plugins.adblock.log.cleared"
-#                     "kmeleon.plugins.adblock.icons.alternate"
-# Files             : adblock.txt, adblock.log, adblockmacro.log  ( in the profile )
+#                     "kmeleon.plugins.adblock.rules.cleared", "kmeleon.plugins.adblock.log.cleared",
+#				      "kmeleon.plugins.adblock.subs.core", "kmeleon.plugins.adblock.subs.easylist",
+#				      "kmeleon.plugins.adblock.subs.customcheck", "kmeleon.plugins.adblock.subs.custom",
+#				      "kmeleon.plugins.adblock.subs.french", "kmeleon.plugins.adblock.subs.spanish",
+#				      "kmeleon.plugins.adblock.subs.german", "kmeleon.plugins.adblock.subs.chinese",
+#				      "kmeleon.plugins.adblock.subs.russian",	"kmeleon.plugins.adblock.subs.cntblock",
+#				      "kmeleon.plugins.adblock.subs.privacy", "kmeleon.plugins.adblock.subs.facebook",
+#				      "kmeleon.plugins.adblock.newsubscriptions", "kmeleon.plugins.adblock.rulesnew",
+# Preferences:		  "kmeleon.plugins.sessions.autoload", "kmeleon.extensions.restart.autoload",
+#	(session)		  "kmeleon.plugins.sessions.openStart", "kmeleon.extensions.restart.openStart",
+#					  "kmeleon.plugins.sessions.ask_autoload", "kmeleon.extensions.restart.ask_autoload",
+#					  "kmeleon.extensions.restart",
+# Files:		      adblock.txt, adblock.log, (created in profile by adblock.dll)
+#					  adblockmacro.log (created in profile by macro)
+# -----------------------------------------------------------------------------------
+#
+# AdBlock Locus is maintained by RJJ III and includes code from the following macro 
+# by JamesD, rodocop, & siria:
+# http://kmeleonbrowser.org/forum/read.php?9,135175
+#
 # -----------------------------------------------------------------------------------
 
 _Adblockplugin_disable {
 menuchecked= getpref( BOOL, "kmeleon.plugins.adblock.disabled") ;
-macroinfo= _("Disable the plugin, checked or enable the plugin, un-checked.");
+macroinfo= _("Checked: plugin disabled. Or not checked: plugin enabled.");
 macros("_Adblockplugin_toggle");
 }
 
 _Adblockplugin_subscriptions {
 macroinfo=_("View the list of subscriptions.");
+menuchecked=statusbar( "View and edit the blocking list and log." );
 $_Adblockplugin_sources  = getpref( STRING, "kmeleon.plugins.adblock.subscriptions") ; 
 $_Adblockplugin_sources = gsub( "|", "\n\n", $_Adblockplugin_sources );
-alert($_Adblockplugin_sources, _("Subscriptions"), INFO);
+alert($_Adblockplugin_sources, _("Adblock Subscriptions"));
 }
 
 _Adblockplugin_logging {
@@ -48,9 +68,22 @@ _Adblockplugin_FileNotFound{
 alert(sub("%s",$acfg_File,_("The file %s could not be found.")),_(Adblock),EXCLAIM);
 }
 
+# Rather than giving an error message in prompt, this creates the message in adblock.txt
+_Adblockplugin_FileNotFoundRules{
+$_file=getfolder(ProfileFolder)."\\adblock.txt";
+$_x=appendfile($_file, "! No rules were found. If this is your first time running AdBlock Locus, choose Refresh Rules from the AdBlock Locus menu to download subscriptions and start blocking ads. You can select which lists of blocking rules you want to use by selecting Tools > AdBlock Locus> Subscriptions and toggling subscriptions. You should use at least one base subscription like Easylist or Core. You can add supplemental subscriptions for different languages and filters.");
+$__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
+$__data=readfile($__path);
+if ($__data=="") {&_Adblockplugin_FileNotFound;
+ } else {
+ $ext="txt"; &getSecureExtensionHandler;
+ exec(sub("%1",$__path,$cmdline));
+ }
+}
+
 _Adblockplugin_rules {
 macroinfo=_("Open the rules in a text editor.");
-menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");
+menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.rules.deleted");
 $__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
 $__data=readfile($__path);
 if ($__data=="") {&_Adblockplugin_FileNotFoundRules;
@@ -60,10 +93,8 @@ if ($__data=="") {&_Adblockplugin_FileNotFoundRules;
  }
 }
 
-#I want to create a similar placeholder text file where I can make a message including, how the BAB works, copy/paste, nuke, etc.
 _Adblockplugin_user_rules {
 macroinfo=_("Open the rules in a text editor.");
-menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");
 $__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
 $__data=readfile($__path);
 if ($__data=="") {&_Adblockplugin_FileNotFoundUserRules;
@@ -73,9 +104,10 @@ if ($__data=="") {&_Adblockplugin_FileNotFoundUserRules;
  }
 }
 
+#Create the user's custom rules file if it doesn't exist yet
 _Adblockplugin_FileNotFoundUserRules{
 $_file=getfolder(ProfileFolder)."\\adblock_user.txt";
-$_x=appendfile($_file, "! AdBlock Locus custom rules subscription");
+$_x=appendfile($_file, "! AdBlock Locus custom rules subscription: \n! The macro handles custom rules as a subscription to this file. \n! Refresh the rules or delete 'adblock.txt' to reload these rules. \n! Lines beginning with a '!' are comments. \n! Rule syntax:  https://adblockplus.org/filter-cheatsheet \n! Support:      http://kmeleonbrowser.org/forum/read.php?19,156032");
 $__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
 $__data=readfile($__path);
 if ($__data=="") {&_Adblockplugin_FileNotFound;
@@ -101,20 +133,21 @@ if ($__data=="") {&_Adblockplugin_FileNotFound;
 
 _Adblockplugin_clear_rules {
 macroinfo=_("Delete the current rules (adblock.txt).");
-menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");  
+menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.rules.deleted");
 # Delete prefs first to avoid duplication bug
 delpref( "kmeleon.plugins.adblock.subscriptions" );
 $__path=getfolder(ProfileFolder)."\\adblock.txt" ;
 $__return = deletefile($__path);
 if ($__return) {
-  logmsg(_("Adblock clear rules succeded. code = ").$__return, warning);
-  setpref(BOOL, "kmeleon.plugins.adblock.rules.cleared", true); 
+  logmsg(_("AdBlock Locus clear rules succeded. code = ").$__return, warning);
+  setpref(BOOL, "kmeleon.plugins.adblock.rules.deleted", true); 
   $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("The rules file, adblock.txt, was deleted by user.");
   appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
   macros("_Adblockplugin_toolbar_set");
   } else {
-  logmsg(_("Adblock clear rules failed. code = ").$__return, error);
+  logmsg(_("AdBlock Locus clear rules failed. code = ").$__return, error);
   }  
+# Restart KM on next startup to load rules:
 }
 
 _Adblockplugin_clear_log {
@@ -123,12 +156,12 @@ menugrayed = getpref(BOOL, "kmeleon.plugins.adblock.log.cleared");
 $__path=getfolder(ProfileFolder)."\\adblock.log" ;
 $__return = deletefile($__path);
 if ($__return) {
-  logmsg(_("Adblock clear log succeded. code = ").$__return , warning);
+  logmsg(_("AdBlock Locus clear log succeded. code = ").$__return , warning);
   setpref(BOOL, "kmeleon.plugins.adblock.log.cleared", true);
   $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("The log file, adblock.log, was deleted by user.");
   appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
   } else {
-  logmsg(_("Adblock clear log failed. code = ").$__return , error);
+  logmsg(_("AdBlock Locus clear log failed. code = ").$__return , error);
   }  
 }
 
@@ -137,12 +170,13 @@ menuchecked= getpref( BOOL, "kmeleon.plugins.adblock.rules.auto") ;
 macroinfo= _("Toggle automatic update of rules from subscriptions.");
 togglepref( BOOL, "kmeleon.plugins.adblock.rules.auto");
 $__abauto = getpref(BOOL, "kmeleon.plugins.adblock.rules.auto");
-$__abauto ? $__abauto =_("ON") : $__abauto =_("OFF") ; 
-logmsg(_("Adblock plugin automatic value for rules set to ").$__abauto.".", warning);
-statusbar(_("Adblock rules file automatic deletion set to")." >> ".$__abauto." <<.");
+$__abauto ? $__abauto =_("be AUTOMATICALLY") : $__abauto =_("NOT be") ; 
+logmsg(_("AdBlock Locus automatic update of blocking rules was set to ").$__abauto.".", warning);
+statusbar(_("The AdBlock plugin rules will ").$__abauto." deleted and updated.");
 }    
 
 _Adblockplugin_Aclear_rules_I {
+menuchecked=statusbar( "Delete logs or rules automatically. New rules are downloaded after deletion." );
 macroinfo= _("Set the interval for automatic updates.");
 $_Adblockplugin_rule_days=getpref(INT, "kmeleon.plugins.adblock.rules.days");
 $__abtype = _("rules") ; $__abtypeL = "rules" ;
@@ -154,9 +188,9 @@ menuchecked= getpref( BOOL, "kmeleon.plugins.adblock.log.auto") ;
 macroinfo= _("Toggle automatic deletion of logs.");
 togglepref( BOOL, "kmeleon.plugins.adblock.log.auto");
 $__abauto = getpref(BOOL, "kmeleon.plugins.adblock.log.auto");
-$__abauto ? $__abauto =_("ON") : $__abauto =_("OFF") ; 
-logmsg(_("Adblock plugin automatic value for log set to ").$__abauto.".", warning);
-statusbar(_("Adblock log file automatic deletion set to")." >> ".$__abauto." <<.");
+$__abauto ? $__abauto =_("be AUTOMATICALLY") : $__abauto =_("NOT be") ; 
+logmsg(_("Adblock Locus automatic deletion of blocking log is ").$__abauto.".", warning);
+statusbar(_("The AdBlock plugin log will ").$__abauto." deleted.");
 }
 
 _Adblockplugin_Aclear_log_I {
@@ -169,10 +203,10 @@ macros("_Adblockplugin_Aclear_interval");
 _Adblockplugin_Aclear_interval {
 if ( $__abtypeL == "rules" ) {
    $__abint = $_Adblockplugin_rule_days; }else{ $__abint = $_Adblockplugin_log_days; }
-$__abintxt1 = _("The measure of time used for\nautomatic actions is one day.\n\nThe value must be at least 1.") ;
-$__abintxt2 = _("The current value for deleting \n").$__abtype._(" is\t").$__abint.".";
-$__abintxt3 = _("Do you wish to change the current value?");  
-$__abcf = confirm( $__abintxt1."\n".$__abintxt2."\n\n".$__abintxt3 , _("Adblock ").$__abtype._(" days verification.") ,YESNO, QUESTION );
+$__abintxt1 = _("The unit of time used for\nautomatic actions is a day.\n\nThe value must be at least 1 day.") ;
+$__abintxt2 = _("The current schedule for deleting the \n").$__abtype._(" is:\t").$__abint." days.";
+$__abintxt3 = _("Do you wish to change the number of days?");  
+$__abcf = confirm( $__abintxt1."\n".$__abintxt2."\n\n".$__abintxt3 , _("AdBlock Locus ").$__abtype._(" deletion interval") ,YESNO, QUESTION );
 if ($__abcf == "YES") { macros("_Adblockplugin_Aclear_int_chg") ;
   }else{ $__abp = $__abint;   macros("_Adblockplugin_Aclear_InvSet"); }
 }
@@ -224,27 +258,10 @@ if ($__data=="") {&_Adblockplugin_FileNotFound;
 
 _Adblockplugin_DayCheck {  ## DayCheck happens OnQuit.  Logmsg() items are lost
 $_adblockmacro_text = "";  ## set macrotext value to empty -  global over both rules and log
-## if rules have been cleared and offline then insert dummy rules
+# Check for adblock.txt before closing because it's loaded the next time KM opens.
 $__path=getfolder(ProfileFolder)."\\adblock.txt";
-if ( getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared") ) {
-   if ( getpref(BOOL, "kmeleon.general.offline") ) {  ## OFFLINE
-      $__return = writefile($__path, "[BASIC ADBLOCK]\n!dummy for offline hold"); 
-      if ($__return) {
-         $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt - dummy data for offline.");
-      } else {
-         $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt - dummy data for offline failed. code = ").$__return;
-      }
-      ## if rules are cleared and online, check for dummy and clear if found
-   } else {  ## ONLINE
-      if (fileexists($__path)) {
-         $__return = deletefile($__path); 
-         if ($__return) {
-           $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt - removed dummy data for offline.");
-           } else {
-           $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt - removed dummy data for offline failed. code = ").$__return;
-          }
-      }
-   }
+if (fileexists($__path)) {
+	delpref("kmeleon.plugins.adblock.rules.deleted");
 }
 getpref( BOOL, "kmeleon.general.offline") ? &_Adblockplugin_DayCheck3 : &_Adblockplugin_DayCheck2 ;   
 }
@@ -256,7 +273,7 @@ if ((getpref(BOOL,"kmeleon.plugins.adblock.rules.auto")) and ( time() > getpref(
    if (fileexists($__path)) {
      $__return = deletefile($__path);
      if ($__return) {
-       $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt file deleted automaticly.");
+       $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock.txt file deleted automatically.");
        } else {
        $_adblockmacro_text = $_adblockmacro_text ."\n". date( "%Y-%m-%d %H:%M" )." >> "._("Adblock clear rules (adblock.txt) failed. code = ").$__return;
        }
@@ -314,13 +331,13 @@ $__adbQtxt = fileexists(getfolder(ProfileFolder))."\\adblock.txt";
 $__adbQtxt ? $__adbQtxt = _("AVAILABLE") : $__adbQtxt = _("NOT AVAILABLE");
 $__adbQlog = getfolder(ProfileFolder)."\\adblock.log";
 $__adbQlog ? $__adbQlog = _("AVAILABLE") : $__adbQlog = _("NOT AVAILABLE");
-$__adbQicon = getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate");
-$__adbQicon ? $__adbQicon = _("TRUE") : $__adbQicon = _("FALSE"); 
+#	$__adbQicon = getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate");
+#	$__adbQicon ? $__adbQicon = _("TRUE") : $__adbQicon = _("FALSE"); 
 $__adbQtext = _("Plugin disabled is ").$__adbQrunning;
 $__adbQtext = $__adbQtext ."\n". _("Logging is ").$__adbQlogging;
 $__adbQtext = $__adbQtext ."\n". _("File adblock.txt is ").$__adbQtxt;
 $__adbQtext = $__adbQtext ."\n". _("File adblock.log is ").$__adbQlog;
-$__adbQtext = $__adbQtext ."\n". _("Displaying alternate icons is ").$__adbQicon;
+#	$__adbQtext = $__adbQtext ."\n". _("Displaying alternate icons is ").$__adbQicon;
 $__adbQtext = $__adbQtext ."\n\n". _("Automatics");
 $__adbQtext = $__adbQtext ."\n". _("Auto delete rules is ").$__adbQruleauto;
 $__adbQtext = $__adbQtext ."\n". _("Interval for rules is ").$__adbQruleinterval._(" days.");
@@ -328,30 +345,33 @@ $__adbQtext = $__adbQtext ."\n". _("Next date for rules is ").date("%Y-%m-%d %H:
 $__adbQtext = $__adbQtext ."\n". _("Auto delete log is ").$__adbQlogauto;
 $__adbQtext = $__adbQtext ."\n". _("Interval for log is ").$__adbQloginterval._(" days.");
 $__adbQtext = $__adbQtext ."\n". _("Next date for log is ").date("%Y-%m-%d %H:%M", $__adbQlognext);
-alert($__adbQtext, _("Adblock Locus settings"), INFO);
+alert($__adbQtext, _("Adblock Settings"), INFO);
 }
 
 _Adblockplugin_ICONS {
-menuchecked= getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate" ) ;
-macroinfo = _("If checked, green indicates that the adblocker is ON.");
-togglepref( BOOL, "kmeleon.plugins.adblock.icons.alternate") ;
-$_Adblockplugin_IcoChg = true;
-macros("_Adblockplugin_toolbar_set");
+#	menuchecked= getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate" ) ;
+#	macroinfo = _("If checked, green indicates that the adblocker is ON.");
+#	togglepref( BOOL, "kmeleon.plugins.adblock.icons.alternate") ;
+#	$_Adblockplugin_IcoChg = true;
+#	macros("_Adblockplugin_toolbar_set");
 }
 
 
 _Adblockplugin_allowDomain {
-macroinfo= _("Add an exception for this domain.");
+macroinfo= _("Add an exception to allow all items on this domain.");
 $_ABL_domain = hostname($URLBAR);  
 $_line="\n\n@@||";
-$_line=$_line.$_ABL_domain."^\n\n";
-$_file=getfolder(ProfileFolder)."\\adblock.txt";
-$_x=appendfile($_file, $_line);
-$_allowConfirm="An exception was made for " . $_ABL_domain ." \n\nIt will be allowed after you restart K-Meleon.";
-$_file2=getfolder(ProfileFolder)."\\adblock_user.txt";
-$_x=appendfile($_file2, $_line);
-if ($_x==false) alert("AdBlock Locus cannot write to adblock.txt rules.","Error",EXCLAIM);
-alert($_allowConfirm);
+$_line=$_line.$_ABL_domain."^$document\n\n";
+$_line = prompt("Click OK to add this exception to your custom rules in adblock_user.txt.","Create Exception",$_line);
+if ($_line){
+	$_file=getfolder(ProfileFolder)."\\adblock.txt";
+	$_x=appendfile($_file, $_line);
+	$_allowConfirm="An exception was made to allow items on " . $_ABL_domain ." \n\nIt will take effect after you restart K-Meleon.";
+	$_file2=getfolder(ProfileFolder)."\\adblock_user.txt";
+	$_x=appendfile($_file2, $_line);
+	if ($_x==false) alert("AdBlock Locus cannot write to adblock.txt rules.","Error",EXCLAIM);
+	alert($_allowConfirm, "AdBlock Locus");
+	}
 }
 
 _Adblockplugin_allowAddress {
@@ -364,29 +384,56 @@ $_allowConfirm="An exception was made for " . $URLBAR ." \n\nIt will be allowed 
 $_file2=getfolder(ProfileFolder)."\\adblock_user.txt";
 $_x=appendfile($_file2, $_line);
 if ($_x==false) alert("AdBlock Locus cannot write to adblock.txt rules.","Error",EXCLAIM);
-alert($_allowConfirm);
+alert($_allowConfirm, "Adblock Locus");
+}
+
+_Adblockplugin_toggle {
+togglepref( BOOL, "kmeleon.plugins.adblock.disabled") ;
+macros("_Adblockplugin_toolbar_set");
+$__adbdisabled = getpref(BOOL, "kmeleon.plugins.adblock.disabled");
+$__adbdisabled ? $__adbdisabled = _("DISABLED") : $__adbdisabled = _("ENABLED");
+$_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Ad blocking is ").$__adbdisabled._(" by user.");
+appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+statusbar(_("Ad blocking is ").$__adbdisabled);
+&_ABL_Sync_PrivacyBar;
 }
 
 
 
 _Adblockplugin_About{
+menuchecked=statusbar( "AdBlock Locus: GUI for K-Meleon's ad-blocking plugin." );
 macroinfo= _("Display information, version number, and copyright for AdBlock Locus.");
-alert(_("AdBlock Locus enables access to K-Meleon's built-in adblocker. It was created by the community and is not endorsed by K-Meleon or AdBlock Plus. For development information and support visit the K-Meleon forums.
+alert(_("AdBlock Locus enables access to K-Meleon's built-in adblocker. The built-in adblocker is contained in the adblock kplugin and does not have a graphical interface. The adblock plugin supports most blocking syntax and can use subscriptions to any text-based list of blocking rules.
 
-AdBlock Locus has been distributed freely and is provided AS IS, WITHOUT WARRANTY OF ANY KIND. In no event shall the authors be liable for any claim, damage, or other liability.
+AdBlock Locus was created by the community and is not endorsed by K-Meleon or AdBlock Plus. For development information and support visit the K-Meleon forums. AdBlock Locus has been distributed freely and is provided AS IS, WITHOUT WARRANTY OF ANY KIND. In no event shall the authors be liable for any claim, damage, or other liability.
 
 Special thanks to: Dorian, James D, Siria, Rodocop, and the K-Meleon community.
 
-Version 1.3
+Version 2.0
 
-Copyright © 2022, all rights reserved."),_("AdBlock Locus 1.0"), INFO);
+Copyright R.J.J. III © 2022, all rights reserved."),_("AdBlock Locus 2.0"), INFO);
 }
+
+
+
+# -----------------------------------------------------------------------------------
+# Subscriptions
+# -----------------------------------------------------------------------------------
 
 #Setting up subscriptions from menu:
 _Adblockplugin_Sub_Core {
 macroinfo= _("A lightweight block list for AdBlock Locus. *Recommended Base*");
 menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.core");
 togglepref(BOOL, "kmeleon.plugins.adblock.subs.core");
+$_ABL_Sub_MacroLog=getpref(BOOL, "kmeleon.plugins.adblock.subs.core");
+if($_ABL_Sub_MacroLog){
+	$_Adblockplugin_Sub_Logging="enabled.";
+	}
+else{
+	$_Adblockplugin_Sub_Logging="disabled.";
+	}
+$_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("The AdBlock Locus Core base subscription was ".$_Adblockplugin_Sub_Logging);
+appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
 &_Adblockplugin_Sub_Set;
 }
 
@@ -394,6 +441,15 @@ _Adblockplugin_Sub_Easylist {
 macroinfo= _("A popular blocklist often used with AdBlock Plus. A heavier alternative to AdBlock Locus Core.");
 menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.easylist");
 togglepref(BOOL, "kmeleon.plugins.adblock.subs.easylist");
+$_ABL_Sub_MacroLog=getpref(BOOL, "kmeleon.plugins.adblock.subs.easylist");
+if($_ABL_Sub_MacroLog){
+	$_Adblockplugin_Sub_Logging="enabled.";
+	}
+else{
+	$_Adblockplugin_Sub_Logging="disabled.";
+	}
+$_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("The Easylist base subscription was ".$_Adblockplugin_Sub_Logging);
+appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
 &_Adblockplugin_Sub_Set;
 }
 
@@ -401,20 +457,33 @@ _Adblockplugin_Sub_Sup {
 macroinfo= _("Supplemental subscription.");
 menuchecked=getpref(BOOL, "kmeleon.plugins.adblock.subs.".$ARG);
 togglepref(BOOL, "kmeleon.plugins.adblock.subs.".$ARG);
+$_ABL_Sub_MacroLog=getpref(BOOL, "kmeleon.plugins.adblock.subs.".$ARG);
+if($_ABL_Sub_MacroLog){
+	$_Adblockplugin_Sub_Logging="enabled.";
+	}
+else{
+	$_Adblockplugin_Sub_Logging="disabled.";
+	}
+$_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("The ".$ARG." subscription was ".$_Adblockplugin_Sub_Logging);
+appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
 &_Adblockplugin_Sub_Set;
 }
 
 _Adblockplugin_Sub_Custom {
 macroinfo= _("Add the URL for an additional subscription.");
+# One variable below for checked, another for the subscription in string form
 menuchecked=getpref(BOOL,"kmeleon.plugins.adblock.subs.customcheck");
 $_Adblockplugin_Custom_Input="";
 $_Adblockplugin_Custom_Input=$_Adblockplugin_Custom_Input.getpref(STRING,"kmeleon.plugins.adblock.subs.custom");
 $_Adblockplugin_Custom_Input=prompt("Copy and paste a subscription URL below.","Custom subscription", $_Adblockplugin_Custom_Input);
 
+# Don't clear if no input. K-Meleon treats "Cancel" as a blank input.
 if($_Adblockplugin_Custom_Input!="")
 {setpref(STRING, "kmeleon.plugins.adblock.subs.custom", $_Adblockplugin_Custom_Input);
 &_Adblockplugin_Sub_Custom_Check;
-alert(_("Your custom subscription has been updated to:\n\n".$_Adblockplugin_Custom_Input."\n\nSelect Refresh Rules in the AdBlock Locus menu to re-start K-Meleon and use the new blocklist."),_("Custom Subscription"), INFO);
+alert(_("Your custom subscription has been updated to:\n\n".$_Adblockplugin_Custom_Input."\n\nSelect Refresh Rules in the AdBlock Locus menu to re-start K-Meleon and use the new blocklist."),_("Custom Subscription"));
+$_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("The custom subscription section was updated to: ".$_Adblockplugin_Custom_Input);
+appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
 &_Adblockplugin_Sub_Set;
 }
 else{
@@ -422,9 +491,10 @@ else{
 alert(_("No URL was entered. Your custom subscription below was unchanged:\n\n".getpref(STRING, "kmeleon.plugins.adblock.subs.custom")."\n\nTo disable the custom subscription enter a blank space as a new custom subscription."),_("Custom Subscription"), INFO);}
 }
 
+# Only place a checkmark if the contents of custom string are long enough to be a URL.
 _Adblockplugin_Sub_Custom_Check {
 $_Adblockplugin_Check=getpref(STRING, "kmeleon.plugins.adblock.subs.custom");
-if(length($_Adblockplugin_Check)>7)
+if(length($_Adblockplugin_Check)>17)
 {setpref(BOOL,"kmeleon.plugins.adblock.subs.customcheck",true);}
 else{
 setpref(BOOL,"kmeleon.plugins.adblock.subs.customcheck",false);
@@ -443,8 +513,8 @@ if(getpref(BOOL, "kmeleon.plugins.adblock.subs.core"))
 if(getpref(BOOL, "kmeleon.plugins.adblock.subs.easylist"))
 {$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://easylist-downloads.adblockplus.org/easylist_noelemhide.txt|";}
 
-if(getpref(BOOL, "kmeleon.plugins.adblock.subs.fallback"))
-{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://rjjiii.github.io/K-Meleon/AdBlockLocus/Fallback.txt|";}
+#	if(getpref(BOOL, "kmeleon.plugins.adblock.subs.fallback"))
+#	{$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://rjjiii.github.io/K-Meleon/AdBlockLocus/Fallback.txt|";}
 
 if(getpref(BOOL, "kmeleon.plugins.adblock.subs.french"))
 {$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://filters.adtidy.org/extension/ublock/filters/113_optimized.txt|";}
@@ -471,7 +541,7 @@ if(getpref(BOOL, "kmeleon.plugins.adblock.subs.facebook"))
 {$_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."https://secure.fanboy.co.nz/fanboy-antifacebook.txt|";}
 
 $_Adblockplugin_usersub=getfolder(ProfileFolder)."\\adblock_user.txt";
-$_Adblockplugin_usersub="file:///".gsub("\\","/",$_Adblockplugin_usersub);
+$_Adblockplugin_usersub="file://".gsub("\\","/",$_Adblockplugin_usersub);
 $_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs.$_Adblockplugin_usersub."|";
 
 $_Adblockplugin_NewSubs=$_Adblockplugin_NewSubs."|".getpref(STRING, "kmeleon.plugins.adblock.subs.custom");
@@ -483,19 +553,28 @@ setpref(STRING, "kmeleon.plugins.adblock.newsubscriptions", $_Adblockplugin_Aler
 &_Adblockplugin_subscriptions;
 }
 
+_Adblockplugin_Sub_Restore{
+macroinfo="Restore subscriptions to their default configuration.";
+menuchecked=statusbar( "Set up blocking rules." );
+setpref(BOOL, "kmeleon.plugins.adblock.subs.core", true); 
+delpref("kmeleon.plugins.adblock.subs.easylist");
+delpref("kmeleon.plugins.adblock.subs.french");
+delpref("kmeleon.plugins.adblock.subs.spanish");
+delpref("kmeleon.plugins.adblock.subs.german");
+delpref("kmeleon.plugins.adblock.subs.chinese");
+delpref("kmeleon.plugins.adblock.subs.russian");
+delpref("kmeleon.plugins.adblock.subs.cntblock");
+delpref("kmeleon.plugins.adblock.subs.privacy");
+delpref("kmeleon.plugins.adblock.subs.facebook");
+delpref("kmeleon.plugins.adblock.subs.customcheck");
+delpref("kmeleon.plugins.adblock.subs.custom");
+&_Adblockplugin_Sub_Set;}
 
-_Adblockplugin_FileNotFoundRules{
-$_file=getfolder(ProfileFolder)."\\adblock.txt";
-$_x=appendfile($_file, "! No rules were found. If this is your first time running AdBlock Locus, choose Refresh Rules from the AdBlock Locus menu to download subscriptions and start blocking ads.");
-$__path=getfolder(ProfileFolder)."\\".$ARG.".txt";
-$__data=readfile($__path);
-if ($__data=="") {&_Adblockplugin_FileNotFound;
- } else {
- $ext="txt"; &getSecureExtensionHandler;
- exec(sub("%1",$__path,$cmdline));
- }
-}
 
+
+# -----------------------------------------------------------------------------------
+# Initial Setup
+# -----------------------------------------------------------------------------------
 _Adblockplugin_initial {
 # setpref(BOOL, "kmeleon.plugins.adblock.rules.auto", true);
 $__abpmacro_path = getfolder(ProfileFolder) . "//adblockmacro.log";
@@ -529,16 +608,15 @@ $_Adblockplugin_load=getpref(STRING, "kmeleon.plugins.adblock.newsubscriptions")
 }
 else{
   $_Adblockplugin_usersub=getfolder(ProfileFolder)."\\adblock_user.txt";
-  $_Adblockplugin_usersub="file:///".gsub("\\","/",$_Adblockplugin_usersub);
+  $_Adblockplugin_usersub="file://".gsub("\\","/",$_Adblockplugin_usersub);
   $_Adblockplugin_load = "https://rjjiii.github.io/K-Meleon/AdBlockLocus/Core.txt";
-  $_Adblockplugin_load = $_Adblockplugin_load ."|". "https://rjjiii.github.io/K-Meleon/AdBlockLocus/Fallback.txt" ; 
   $_Adblockplugin_load = $_Adblockplugin_load ."|".   $_Adblockplugin_usersub ; 
   setpref(BOOL, "kmeleon.plugins.adblock.subs.core", true);
-  setpref(BOOL, "kmeleon.plugins.adblock.subs.fallback", true);  
+  $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("The default subscription was set and downloaded.");
+  appendfile($_BABmacro_path, "\n".$_adblockmacro_text); 
 }  
   setpref(STRING, "kmeleon.plugins.adblock.subscriptions", $_Adblockplugin_load ) ;
-  $_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Adblock subscriptions initial load approved.");
-  appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
+
   
   
 $_Adblockplugin_len <3 ? &_Adblockplugin_initial_load : 0 ;
@@ -572,56 +650,138 @@ _Adblockplugin_initial_load {
   
 removebutton("Adblock_plugin", "macros(_Adblockplugin_toggle)" );
 # ?? remove or change?
-addbutton("Adblock_plugin", "macros(basic_ab_Dummy)", "Adblock Locus", "Adblock Locus is INACTIVE \n no rules");
+addbutton("Adblock_plugin", "macros(basic_ab_Dummy)", "Adblock Locus", "No blocking rules are available. \nRestart K-Meleon to download new rules.");
 setcmdicon("macros(basic_ab_Dummy)", "km-ab-dead.ico" );
 }
 
-_Adblockplugin_toggle {
-togglepref( BOOL, "kmeleon.plugins.adblock.disabled") ;
-macros("_Adblockplugin_toolbar_set");
-$__adbdisabled = getpref(BOOL, "kmeleon.plugins.adblock.disabled");
-$__adbdisabled ? $__adbdisabled = _("DISABLED") : $__adbdisabled = _("ENABLED");
-$_adblockmacro_text = date( "%Y-%m-%d %H:%M" )." >> "._("Ad blocking is ").$__adbdisabled._(" by user.");
-appendfile($_BABmacro_path, "\n".$_adblockmacro_text);
-statusbar(_("Ad blocking is ").$__adbdisabled);
-&_ABL_Sync_PrivacyBar;
+basic_ab_Dummy{
+alert("The ad-blocking plugin is inactive. When you restart K-Meleon it will load new blocking rules and become active.", "AdBlock Locus", INFO);
 }
 
+
+
+# -----------------------------------------------------------------------------------
+# Restart
+# -----------------------------------------------------------------------------------
+_Adblockplugin_restart_sessions{
+macroinfo= _("Restart K-Meleon with current session.");
+$sessdef=getpref(BOOL, "kmeleon.plugins.sessions.autoload");
+$sesstyp=getpref(STRING , "kmeleon.plugins.sessions.openStart");
+$sessprompt=getpref(BOOL, "kmeleon.plugins.sessions.ask_autoload");
+setpref(BOOL, "kmeleon.plugins.sessions.autoload", true);
+setpref(STRING , "kmeleon.plugins.sessions.openStart", "Previous Session");
+setpref(BOOL, "kmeleon.plugins.sessions.ask_autoload", false);
+setpref(BOOL, "kmeleon.extensions.restart.autoload", $sessdef);
+setpref(STRING , "kmeleon.extensions.restart.openStart", $sesstyp);
+setpref(BOOL, "kmeleon.extensions.restart.ask_autoload", $sessprompt);
+setpref(BOOL, "kmeleon.extensions.restart", true);
+id(ID_APP_RESTART);
+}
+
+_Adblockplugin_Refresh{
+macroinfo= _("Clear old rules, download new rules, and restart K-Meleon.");
+&_Adblockplugin_clear_rules;
+$_Adblock_Refresh = confirm( "To refresh adblocking rules, AdBlock Locus needs to restart K-Meleon. Are you ready to restart K-Meleon?" , _("Restart K-Meleon") , YESNO , QUESTION ); 
+if ( $_Adblock_Refresh == "YES" ) {
+	&_Adblockplugin_restart_sessions;
+	} 
+else {
+	alert(_("Old adblocking rules have been cleared. New rules will be available the next time you start K-Meleon.", "Adblock Locus"), _("Old Rules Cleared") );
+	}
+setpref(BOOL, "kmeleon.plugins.adblock.rulesnew", true);
+}
+
+_Adblockplugin_restartcheck{
+$restartact=getpref(BOOL, "kmeleon.extensions.restart");
+$restactive=("true");
+$restartact==$restactive?&_Adblockplugin_restoreuserses:0;
+}
+
+_Adblockplugin_restoreuserses{
+setpref(BOOL, "kmeleon.extensions.restart", false);
+$sessdef=getpref(BOOL, "kmeleon.extensions.restart.autoload");
+$sesstyp=getpref(STRING, "kmeleon.extensions.restart.openStart");
+$sessprompt=getpref(BOOL, "kmeleon.extensions.restart.ask_autoload");
+setpref(BOOL, "kmeleon.plugins.sessions.autoload", $sessdef);
+setpref(STRING , "kmeleon.plugins.sessions.openStart", $sesstyp);
+setpref(BOOL, "kmeleon.plugins.sessions.ask_autoload", $sessprompt);
+}
+
+# The macro below is a workaround for the BAB. To download rules the BAB must start
+# with adblock.txt deleted. The BAB then creates adblock.txt from subscriptions. BUT
+# the BAB cannot use any rules added after K-Meleon starts, so every time rules are
+# updated, the BAB starts with no rules and won't have rules until it restarts again.
+# This will only trigger if the user chooses "Refresh" from the menu. The user should
+# always see the clear cause and effect. If this happened for auto-deletion, it
+# could be more of a problem than the BAB's quirks.
+_ABL_Refresh_Restart2{
+	$_ABL_RulesNew=getpref(BOOL, "kmeleon.plugins.adblock.rulesnew");
+	if($_ABL_RulesNew){
+		&_Adblockplugin_restart_sessions;
+		togglepref(BOOL, "kmeleon.plugins.adblock.rulesnew");
+	}
+	}
+
+
+
+# -----------------------------------------------------------------------------------
+# Menus, Buttons, Toolbars
+# -----------------------------------------------------------------------------------
 _Adblockplugin_BuildMenu {
 if (($VERSION >= 33685507) and (pluginexist(adblock)) ) {  # K-Meleon 75.1 or greater and adblock plugin
     ## DO NOT set rules cleared to false if adblock.txt contains dummy string
 	$_BABmacro_path = getfolder(ProfileFolder)."\\adblockmacro.log";
     $_Adblockplugin_IcoChg = false;
-    $__path=getfolder(ProfileFolder)."\\adblock.txt";
-    if ( readfile($__path) != "[BASIC ADBLOCK]\n!dummy for offline hold" )  {
-      setpref(BOOL, "kmeleon.plugins.adblock.rules.cleared", false);
-    }
+	setpref(BOOL, "kmeleon.plugins.adblock.rules.cleared", false);
+	$__ABL_Dummyfix = getpref(BOOL, "kmeleon.plugins.adblock.rules.deleted"); 
+	if ($__ABL_Dummyfix){
+		setpref(BOOL, "kmeleon.plugins.adblock.rules.cleared", true);
+	}
     setpref(BOOL, "kmeleon.plugins.adblock.log.cleared", false); 
     $_adp= "AdBlock Locus";
 	setmenu("PrivacySecurity", popup, $_adp, -1);
-    setmenu($_adp, macro, "Allow Domain", "_Adblockplugin_allowDomain", 0);
-    setmenu($_adp, macro, "Allow Address", "_Adblockplugin_allowAddress", 1);
+	setmenu($_adp, macro, "Allow Globally", "_Adblockplugin_disable", 0);
+    setmenu($_adp, macro, "Allow Domain", "_Adblockplugin_allowDomain", 1);
     setmenu($_adp, macro, "Restart K-Meleon", "_Adblockplugin_restart_sessions", 2);
 	setmenu($_adp, separator, 3);
     setmenu($_adp, macro, "About", "_Adblockplugin_About", 4);		
     $_adA= "Advanced";  $_adAm= "Automatic Settings"; $_adSub= "Subscriptions";
     setmenu($_adp, macro, "View Settings", "_Adblockplugin_QV", 5);
     setmenu($_adp, macro, "Custom Rules", "_Adblockplugin_user_rules(adblock_user)", 6);
-    setmenu($_adp, macro, "Refresh Rules", "_Adblockplugin_Refresh", 7);		
-	setmenu($_adp, popup, $_adA, 8);
-	setmenu($_adp, popup, $_adAm, 9);   
-	setmenu($_adp, popup, $_adSub, 10);	
-    setmenu($_adp, separator, $_adA);    
+    setmenu($_adp, macro, "Refresh Rules", "_Adblockplugin_Refresh", 7);
+    setmenu($_adp, separator, 8);  	
+	setmenu($_adp, popup, $_adA, 9);
+	setmenu($_adp, popup, $_adAm, 10);   
+	setmenu($_adp, popup, $_adSub, 11);	  
     setmenu($_adA, macro, "View the Rules", "_Adblockplugin_rules(adblock)", 0);
     setmenu($_adA, macro, "Clear the Rules", "_Adblockplugin_clear_rules", 1);
     setmenu($_adA, macro, "List Subscriptions", "_Adblockplugin_subscriptions", 2);
 	setmenu($_adA, separator, 3);
-    setmenu($_adA, macro, "Enable Logging", "_Adblockplugin_logging", 4);
+    setmenu($_adA, macro, "Log Blocked Elements", "_Adblockplugin_logging", 4);
     setmenu($_adA, macro, "Clear the Log", "_Adblockplugin_clear_log", 5);
     setmenu($_adA, macro, "View the Log", "_Adblockplugin_logs(adblock)", 6);
-	setmenu($_adA, macro, "View the Macro's Log", "_Adblockplugin_macro_log(adblockmacro)", 7);
-	setmenu($_adA, separator, 8);
-    setmenu($_adA, macro, "Invert Icons", "_Adblockplugin_ICONS", 9);
+	setmenu($_adA, separator, 7);
+	setmenu($_adA, macro, "View the Macro's Log", "_Adblockplugin_macro_log(adblockmacro)", 8);
+# Subscriptions menu
+    setmenu($_adSub, macro, "Core", "_Adblockplugin_Sub_Core", 0);		
+    setmenu($_adSub, macro, "Easylist (ABP)", "_Adblockplugin_Sub_Easylist", 1);
+    setmenu($_adSub, separator, 2);     
+	$_adSupp = "Supplemental";
+	setmenu($_adSub, popup, $_adSupp, 3);		
+    setmenu($_adSub, macro, "Custom", "_Adblockplugin_Sub_Custom", 4);
+    setmenu($_adSub, separator, 5);
+	setmenu($_adSub, macro, "Restore Defaults", "_Adblockplugin_Sub_Restore", 6);	
+# Supplemental subscriptions
+    setmenu($_adSupp, macro, "Français", "_Adblockplugin_Sub_Sup(french)", 0);			
+    setmenu($_adSupp, macro, "Español", "_Adblockplugin_Sub_Sup(spanish)", 1);			
+    setmenu($_adSupp, macro, "Deutsch", "_Adblockplugin_Sub_Sup(german)", 2);			
+    setmenu($_adSupp, macro, "Chinese", "_Adblockplugin_Sub_Sup(chinese)", 3);			
+    setmenu($_adSupp, macro, "Italiano", "_Adblockplugin_Sub_Sup(italian)", 4);			
+    setmenu($_adSupp, macro, "Russian", "_Adblockplugin_Sub_Sup(russian)", 5);			
+    setmenu($_adSupp, macro, "- RU AdList: Counters", "_Adblockplugin_Sub_Sup(cntblock)", 6);	
+    setmenu($_adSupp, separator, 7);     	
+    setmenu($_adSupp, macro, "EasyPrivacy (Optimized)", "_Adblockplugin_Sub_Sup(privacy)", 8);			
+    setmenu($_adSupp, macro, "Anti-Facebook", "_Adblockplugin_Sub_Sup(facebook)", 9);	
     macros("_Adblockplugin_BuildMenuAs");	
     ## create toolbar and set button
     # check icon and set tool tip
@@ -638,124 +798,46 @@ _Adblockplugin_BuildMenuAs {
     setmenu($_adAm, macro, "Set Interval: ".getpref(INT,"kmeleon.plugins.adblock.rules.days")." Days", "_Adblockplugin_Aclear_rules_I", 1);
     setmenu($_adAm, separator, 2);     
     setmenu($_adAm, macro, "Clear Logs", "_Adblockplugin_Aclear_log", 3); 
-    setmenu($_adAm, macro, "Set Interval: ".getpref(INT,"kmeleon.plugins.adblock.log.days")." Days", "_Adblockplugin_Aclear_log_I", 4);
-# Subscriptions menu
-    setmenu($_adSub, macro, "Core", "_Adblockplugin_Sub_Core", 0);		
-    setmenu($_adSub, macro, "Easylist (ABP)", "_Adblockplugin_Sub_Easylist", 1);
-    setmenu($_adSub, separator, 2);     
-	$_adSupp = "Supplemental";
-	setmenu($_adSub, popup, $_adSupp, 3);		
-    setmenu($_adSub, macro, "Custom", "_Adblockplugin_Sub_Custom", 4);		
-# Supplemental subscriptions
-    setmenu($_adSupp, macro, "Français", "_Adblockplugin_Sub_Sup(french)", -1);			
-    setmenu($_adSupp, macro, "Español", "_Adblockplugin_Sub_Sup(spanish)", -1);			
-    setmenu($_adSupp, macro, "Deutsch", "_Adblockplugin_Sub_Sup(german)", -1);			
-    setmenu($_adSupp, macro, "Chinese", "_Adblockplugin_Sub_Sup(chinese)", -1);			
-    setmenu($_adSupp, macro, "Italiano", "_Adblockplugin_Sub_Sup(italian)", -1);			
-    setmenu($_adSupp, macro, "Russian", "_Adblockplugin_Sub_Sup(russian)", -1);			
-    setmenu($_adSupp, macro, "- RU AdList: Counters", "_Adblockplugin_Sub_Sup(cntblock)", -1);	
-    setmenu($_adSupp, separator, -1);     	
-    setmenu($_adSupp, macro, "EasyPrivacy (Optimized)", "_Adblockplugin_Sub_Sup(privacy)", -1);			
-    setmenu($_adSupp, macro, "Anti-Facebook", "_Adblockplugin_Sub_Sup(facebook)", -1);			
-    setmenu($_adSupp, macro, "JS Fallback", "_Adblockplugin_Sub_Sup(fallback)", -1);			
+    setmenu($_adAm, macro, "Set Interval: ".getpref(INT,"kmeleon.plugins.adblock.log.days")." Days", "_Adblockplugin_Aclear_log_I", 4);		
 }
 
 _Adblockplugin_toolbar_set {
 $__abptog = getpref( BOOL, "kmeleon.plugins.adblock.disabled");
 $_Adblockplugin_rules = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");
-# check icon and set tool tip
-if (getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate" ) ) { $__imgn = 3; } else { $__imgn = 0; }
-$_adblockmacro_EIcon = "Basic_Adblock.png[".0+$__imgn.", 32 ,32]"; 
-$_adblockmacro_DIcon = "Basic_Adblock.png[".1+$__imgn.", 32 ,32]"; 
-$_adblockmacro_XIcon = "Basic_Adblock.png[".2+$__imgn.", 32 ,32]";
+# Icons are base64 to fit inside macro file.
+# Disabled icon:
+$_adblockmacro_DIcon = "data:image/png;base64,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"; 
+# Enabled icon:
+$_adblockmacro_EIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABOvAAATrwFj5o7DAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAABWZJREFUWIXNl0tMVGcUx3/fvXfGGYYZBtBYRESoodYHSgWJxdbUjNYYjY8oxsQ0kYjtyqQrVy5l0Q26qhpt1OpGYqI0ssA0JVpcKL4oEsLEVhFpGOQxPGYmc2fu18U8HJzLCKZJ+0++5ObknO//P+f77rnnwn8MMVvHu1At4XMB1kx+EsJA+5dw/18R8BvYNDgFfDs7qUkhZ6Lw/VcQ+mAB98AehWbFZvN8eukSOR4PQtMyE+s6Y7dv03P4MDIUujMF27+GqTkLSCUvb2kha9WqjMTvItjTQ+e2bRiBQEYRpgJSyVdfv05WefmcyJMiurv5Y8+ejCLSBKSSr7pyJY3cCIcZf/gQpHy7iRAgBM7PPkOxTr+jwWfP6Dp4EGOG45gmIEk+b55nxblzONasScsq4PUSURSy16+fZp+8fx+LlNiXLUuP6e6mu67OVISaeGiBeRZoVqzWLctPncKxYgXoetoaf/IE56ZN2EpK0Fyu5BKqyuS9e9gLCtJiLG437qoqhltbi7VodP030HQJIgBKQoATTgtN27K8oQFHaSlyYiJt6f39RKamsJWWpmVpKy0lEgig9/ebxtqLivjk5EmEpnlUaJxWgTuwXsCZpUeP4qqoQIbDpmuiqwtrRQWOlStjZe/oIPz6NdbCQoSioPv9hDo7sbrdpvEWtxtrbi7+jo7KI9DyEwxo8YuwUSgK7vJypN+flh2AlJLAq1cU1NUlbaM3byINg+yqKgCyKyoYaG4mu6godjFN4C4vRygKhmF8ATzQACTYVFWFQAAjEDANDA0OInJysBUXAxAeGCDc0xN7jldhXnExSk4Owd5ebAsXmu4DIFQVaRh2gGRbM6TEGB2dMWjS68WVkv1EezsWKUFKJtrbya+tBcC5eTPjFy9itWb8ZCTxtq9KiRwZMXWSkQhBv5/CDRuStrHmZpzxtjx68yZ5+/cjhMBVU4OvsRHD55uxbcuUHjLNw3jzxjRgcnCQrLVrscyfD0Cwt5dwby+WJUtACMIvXhDyerGXlaHl5WFbvZrJJ09wzHQMpgIMA/3RI1P/KeCjEyfeZt/aitLXR9DnA0AJBhlrbcVeVgaAe+dO/r51C+vr1+YCDMO8AsLpTPPVdZ2wquKqqUnaQl4v4UWLGE7xC3m9yWdXTQ0vHQ6i0SiaxZIuQIhkFbRUo5mAwOAgOTt2oNjtSVvJ6dPmmcWh2O3kbt/O1I0buPPyMvsm+QHF6UxbU4ZB/t69GTcxQ+7u3UzpOiI7O23PVCQaUUhKibTbUVJubnB4GBwOHJWVQOxt6KyuJjwwYEqq5eez9vFjhMUSa07Z2YQjEWwpVTAikUT5g0kBCtw1pGTk1SsWpHx+/b295NXWIpRYofxtbUi/n4+3bjUV0NfezlhbG7lbtiAUhfwDBxhraqIg3rwARjo7kVKiwN04N9TAAwlnfB0dTA4NxcpktzPe18f8ffuSwUNXruBcvBgtP990OQsLeXP1atI/v7YW/8uXCJsNxelkcmgIX0cHAn6sgQfx6scQHz5/EarqKd63D0VV+aupCS3lzIxAgLL6eqy5uaYVCI+O4j1/HiUri8SbHpmYoCSexItr1zAikV8jsCMxrJoOJEJVPUsPHYp921MgLBYsLpcpeQL6+DhS16fZQj4fLy5fRkYiaQPJjCOZ0DRPSX09bpOpaC4Y7+riz7Nnkbr+/pHMTETpsWO41637MPKnT3ne2Dgj+YwC0kQcP05udfWcyP0PH/K8oSEjeUYB74ooOnKEBbt2odpsGYmjoRC+Gzfov3ABTM58TgIgNqw64Qfg2Pt838HPdviuEswnnNkKSKAdqqKwcTY/pyr8nnjP//f4B4Y3c72BBCZyAAAAAElFTkSuQmCC"; 
+# Inactive icon:
+$_adblockmacro_XIcon = "data:image/png;base64,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";
 # change tool tip if from  _Adblockplugin_ICONS 
-if ( $_Adblockplugin_IcoChg ) {
-       # check icon and set tool tip
-    if (getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate" ) ) {
-       $_adblockmacro_TTip = "AdBlock Locus: ON[green] OFF[red]" ; } else {
-       $_adblockmacro_TTip = "Block ads. Right click for more options." ;}
-   removebutton("AdBlock Locus", "macros(_Adblockplugin_toggle)" );
-   addbutton("AdBlock Locus", "macros(_Adblockplugin_toggle)", "AdBlock Locus", $_adblockmacro_TTip);
-   $_Adblockplugin_IcoChg = false;
-   }
+#if ( $_Adblockplugin_IcoChg ) {
+#       # check icon and set tool tip
+#    if (getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate" ) ) {
+#       $_adblockmacro_TTip = "AdBlock Locus: ON[green] OFF[red]" ; } else {
+#       $_adblockmacro_TTip = "Block ads. Right click for more options." ;}
+#   removebutton("AdBlock Locus", "macros(_Adblockplugin_toggle)" );
+#   addbutton("AdBlock Locus", "macros(_Adblockplugin_toggle)", "AdBlock Locus", $_adblockmacro_TTip);
+#   $_Adblockplugin_IcoChg = false;
+#   }
 $__abptog==0 ? setcmdicon( "macros(_Adblockplugin_toggle)", $_adblockmacro_EIcon ) : setcmdicon("macros(_Adblockplugin_toggle)", $_adblockmacro_DIcon );
 if (getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared")) {
   removebutton("AdBlock Locus", "macros(_Adblockplugin_toggle)" );
-  addbutton("AdBlock Locus", "macros(basic_ab_Dummy)", "AdBlock Locus", "Adblock plugin INACTIVE \n no rules");
+  addbutton("AdBlock Locus", "macros(basic_ab_Dummy)", "AdBlock Locus", "New ad-blocking rules have not activated yet. \nRestart K-Meleon to activate the plugin.");
   }  
   setcmdicon("macros(basic_ab_Dummy)", $_adblockmacro_XIcon );
 }
 
-
-
-$_tool_path=getfolder(RootFolder)."\\Tools";
-$_km_path=getfolder(RootFolder)."\\k-meleon.exe";
-$_profile_path=getfolder(ProfileFolder);
-
-
-
-_Adblockplugin_restart_sessions{
-macroinfo= _("Restart K-Meleon with current session.");
-$sessdef=getpref(BOOL, "kmeleon.plugins.sessions.autoload");
-$sesstyp=getpref(STRING , "kmeleon.plugins.sessions.openStart");
-$sessprompt=getpref(BOOL, "kmeleon.plugins.sessions.ask_autoload");
-setpref(BOOL, "kmeleon.plugins.sessions.autoload", true);
-setpref(STRING , "kmeleon.plugins.sessions.openStart", "Previous Session");
-setpref(BOOL, "kmeleon.plugins.sessions.ask_autoload", false);
-setpref(BOOL, "kmeleon.extensions.restart.autoload", $sessdef);
-setpref(STRING , "kmeleon.extensions.restart.openStart", $sesstyp);
-setpref(BOOL, "kmeleon.extensions.restart.ask_autoload", $sessprompt);
-setpref(BOOL, "kmeleon.extensions.restart", true);
-exec($_tool_path."\\restartkm.exe \"".$_km_path."\" \"".$_profile_path."\"");
-id(ID_APP_EXIT);
-}
-
-
-
-_Adblockplugin_Refresh{
-macroinfo= _("Clear old rules, download new rules, and restart K-Meleon.");
-&_Adblockplugin_clear_rules;
-$_Adblock_Refresh = confirm( "To refresh adblocking rules, AdBlock Locus needs to restart K-Meleon. Are you ready to restart K-Meleon?" , _("Restart K-Meleon") , YESNO , QUESTION ); 
-if ( $_Adblock_Refresh == "YES" ) {
-&_Adblockplugin_restart_sessions;
-  } 
-  
-  else {
-alert(_("Old adblocking rules have been cleared. New rules will be available the next time you start K-Meleon."), _("Old Rules Cleared") );
-}
-}
-
-
-
-restartcheck{
-$restartact=getpref(BOOL, "kmeleon.extensions.restart");
-$restactive=("true");
-$restartact==$restactive?&restoreuserses:0;
-}
-
-
-restoreuserses{
-setpref(BOOL, "kmeleon.extensions.restart", false);
-$sessdef=getpref(BOOL, "kmeleon.extensions.restart.autoload");
-$sesstyp=getpref(STRING, "kmeleon.extensions.restart.openStart");
-$sessprompt=getpref(BOOL, "kmeleon.extensions.restart.ask_autoload");
-setpref(BOOL, "kmeleon.plugins.sessions.autoload", $sessdef);
-setpref(STRING , "kmeleon.plugins.sessions.openStart", $sesstyp);
-setpref(BOOL, "kmeleon.plugins.sessions.ask_autoload", $sessprompt);
-}
-
-
-
-
 # Privacy Bar option
-# Add the below entry to "toolsbar.cfg" to block ads from the Privacy Bar
+# Add the below entry to "toolbars.cfg" to block ads from the Privacy Bar
 #	!Ads{
 #	macros(_Adblockplugin_toggle)|&Privacy
 #	Block ads with K-Meleon's built-in ad blocker.
 #	check.png[0,32,32]
 #	}
 _ABL_Sync_PrivacyBar{
-pluginmsg(toolbars,"CheckButton","&Privacy Bar".",macros(_Adblockplugin_toggle),".(!getpref(BOOL,"kmeleon.plugins.adblock.disabled")?1:0));
+pluginmsg(toolbars,"CheckButton","&Privacy Bar".",macros(_Adblockplugin_toggle),".(!getpref(BOOL,"kmeleon.plugins.adblock.disabled")?1:0));	
 }
 
 
@@ -763,17 +845,13 @@ pluginmsg(toolbars,"CheckButton","&Privacy Bar".",macros(_Adblockplugin_toggle),
 
 
 
-
-
-
-
-
-
-
-# -----------------------------------------------------------
-$OnQuit=$OnQuit."_Adblockplugin_DayCheck;";
-$OnSetup=$OnSetup."_Adblockplugin_initial;";
-$OnStartup=$OnStartup."restartcheck;";
+# -----------------------------------------------------------------------------------
+# Startup
+# -----------------------------------------------------------------------------------
 $OnInit=$OnInit."_Adblockplugin_BuildMenu;";
-$macroModules=$macroModules."Adblockplugin;";
+$OnSetup=$OnSetup."_Adblockplugin_initial;";
+$OnStartup=$OnStartup."_Adblockplugin_restartcheck;";
 $OnLoad=$OnLoad."_ABL_Sync_PrivacyBar;";
+$OnQuit=$OnQuit."_Adblockplugin_DayCheck;";
+$OnOpenWindow=$OnOpenWindow."_ABL_Refresh_Restart2;";
+$macroModules=$macroModules."Adblockplugin;";
