@@ -26,6 +26,11 @@ Below is a summary of the subscription options in AdBlock Locus:
 - **Custom:** You can use the "Custom" option to choose any subscription you wish. Be sure to copy the exact URL of the public .txt file. You can enter multiple subscriptions here if you use pipe "|" characters to separate them.
 - **Local:** All of your custom rules are stored in the "ablock_user.txt" file. You can manually add rules to this file. Any time you "nuke" content or "allow" content those will be automatically added to this list.
 
+## Icon Packs
+AdBlock Locus comes with icons built into the module (.kmm) file. If you would like to modify the icons, create custom icons, or download additional icons, AdBlock Locus supports icon packs. The macro will check your **K-Meleon/skins/shared/** folder for an image file named "Basic_Adblock.png" and will use these image assets if they are present. To restore the default icons, rename or delete the .png file. You can download the icons used by previous versions of the BAB macro from the link below: 
+
+https://sourceforge.net/projects/adblock-locus/files/icon_pack.zip/download
+
 ## FAQ
 
 ### Q: How do I allow sites with AdBlock Locus?
