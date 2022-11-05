@@ -29,7 +29,7 @@ Below is a summary of the subscription options in AdBlock Locus:
 ## Icon Packs
 AdBlock Locus comes with icons built into the module (.kmm) file. If you would like to modify the icons, create custom icons, or download additional icons, AdBlock Locus supports icon packs. The macro will check your **K-Meleon/skins/shared/** folder for an image file named "Basic_Adblock.png" and will use these image assets if they are present. To restore the default icons, rename or delete the .png file. You can download the icons used by previous versions of the BAB macro from the link below: 
 
-https://sourceforge.net/projects/adblock-locus/files/icon_pack.zip/download
+https://rjjiii.github.io/K-Meleon/AdBlockLocus/icon_pack.zip
 
 ## FAQ
 
