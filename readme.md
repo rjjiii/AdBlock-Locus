@@ -4,7 +4,7 @@ K-Meleon is a privacy-focused web browser that comes with a built-in ad blocker.
 ## Installation
 To install AdBlock Locus:
 
-https://github.com/rjjiii/AdBlock-Locus/releases/download/v2.0/Adblockplugin.kmm
+https://github.com/rjjiii/AdBlock-Locus/releases/download/v2.1/Adblockplugin.kmm
 
 1. Download the AdBlock Locus K-Meleon macro module (.kmm) above.
 2. Move **Adblockplugin.kmm** to your **K-Meleon/macros** folder or your **/profiles/your.profile/macros/** folder. The entire extension is stored in this single .kmm file.
