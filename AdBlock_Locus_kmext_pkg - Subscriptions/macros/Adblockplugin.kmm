@@ -1,5 +1,5 @@
 ﻿# -----------------------------------------------------------------------------------
-# AdBlock Locus 2.0
+# AdBlock Locus 2.1
 # -----------------------------------------------------------------------------------
 #
 # AdBlock Locus provides a graphical user interface or GUI for K-Meleon's built-in 
@@ -10,7 +10,7 @@
 #
 # -----------------------------------------------------------------------------------
 #
-# KM forum: 		  http://kmeleonbrowser.org/forum/read.php?19,156032
+# KM forum: 		  http://kmeleonbrowser.org/forum/read.php?9,156032
 # Website:			  https://rjjiii.github.io/K-Meleon/AdBlockLocus/
 # Dependencies:		  K-Meleon/kplugins/adblock.dll
 # Preferences:		  "kmeleon.plugins.adblock.subscriptions" (list of URLs for rules)
@@ -48,7 +48,7 @@ macros("_Adblockplugin_toggle");
 
 _Adblockplugin_subscriptions {
 macroinfo=_("View the list of subscriptions.");
-menuchecked=statusbar( "View and edit the blocking list and log." );
+menuchecked=statusbar( _("View and edit the blocking list and log.") );
 $_Adblockplugin_sources  = getpref( STRING, "kmeleon.plugins.adblock.subscriptions") ; 
 $_Adblockplugin_sources = gsub( "|", "\n\n", $_Adblockplugin_sources );
 alert($_Adblockplugin_sources, _("Adblock Subscriptions"));
@@ -176,7 +176,7 @@ statusbar(_("The AdBlock plugin rules will ").$__abauto." deleted and updated.")
 }    
 
 _Adblockplugin_Aclear_rules_I {
-menuchecked=statusbar( "Delete logs or rules automatically. New rules are downloaded after deletion." );
+menuchecked=statusbar( _("Delete logs or rules automatically. New rules are downloaded after deletion.") );
 macroinfo= _("Set the interval for automatic updates.");
 $_Adblockplugin_rule_days=getpref(INT, "kmeleon.plugins.adblock.rules.days");
 $__abtype = _("rules") ; $__abtypeL = "rules" ;
@@ -349,11 +349,7 @@ alert($__adbQtext, _("Adblock Settings"), INFO);
 }
 
 _Adblockplugin_ICONS {
-#	menuchecked= getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate" ) ;
-#	macroinfo = _("If checked, green indicates that the adblocker is ON.");
-#	togglepref( BOOL, "kmeleon.plugins.adblock.icons.alternate") ;
-#	$_Adblockplugin_IcoChg = true;
-#	macros("_Adblockplugin_toolbar_set");
+#	Former macro to invert icons.
 }
 
 
@@ -369,7 +365,7 @@ if ($_line){
 	$_allowConfirm="An exception was made to allow items on " . $_ABL_domain ." \n\nIt will take effect after you restart K-Meleon.";
 	$_file2=getfolder(ProfileFolder)."\\adblock_user.txt";
 	$_x=appendfile($_file2, $_line);
-	if ($_x==false) alert("AdBlock Locus cannot write to adblock.txt rules.","Error",EXCLAIM);
+	if ($_x==false) alert(_("AdBlock Locus cannot write to adblock.txt rules."),_("Error"),EXCLAIM);
 	alert($_allowConfirm, "AdBlock Locus");
 	}
 }
@@ -383,7 +379,7 @@ $_x=appendfile($_file, $_line);
 $_allowConfirm="An exception was made for " . $URLBAR ." \n\nIt will be allowed after you restart K-Meleon.";
 $_file2=getfolder(ProfileFolder)."\\adblock_user.txt";
 $_x=appendfile($_file2, $_line);
-if ($_x==false) alert("AdBlock Locus cannot write to adblock.txt rules.","Error",EXCLAIM);
+if ($_x==false) alert(_("AdBlock Locus cannot write to adblock.txt rules."),_("Error"),EXCLAIM);
 alert($_allowConfirm, "Adblock Locus");
 }
 
@@ -401,7 +397,7 @@ statusbar(_("Ad blocking is ").$__adbdisabled);
 
 
 _Adblockplugin_About{
-menuchecked=statusbar( "AdBlock Locus: GUI for K-Meleon's ad-blocking plugin." );
+menuchecked=statusbar( _("AdBlock Locus: GUI for K-Meleon's ad-blocking plugin.") );
 macroinfo= _("Display information, version number, and copyright for AdBlock Locus.");
 alert(_("AdBlock Locus enables access to K-Meleon's built-in adblocker. The built-in adblocker is contained in the adblock kplugin and does not have a graphical interface. The adblock plugin supports most blocking syntax and can use subscriptions to any text-based list of blocking rules.
 
@@ -409,9 +405,9 @@ AdBlock Locus was created by the community and is not endorsed by K-Meleon or Ad
 
 Special thanks to: Dorian, James D, Siria, Rodocop, and the K-Meleon community.
 
-Version 2.0
+Version 2.1
 
-Copyright R.J.J. III © 2022, all rights reserved."),_("AdBlock Locus 2.0"), INFO);
+Copyright R.J.J. III © 2022, all rights reserved."),_("AdBlock Locus 2.1"), INFO);
 }
 
 
@@ -554,8 +550,8 @@ setpref(STRING, "kmeleon.plugins.adblock.newsubscriptions", $_Adblockplugin_Aler
 }
 
 _Adblockplugin_Sub_Restore{
-macroinfo="Restore subscriptions to their default configuration.";
-menuchecked=statusbar( "Set up blocking rules." );
+macroinfo=_("Restore subscriptions to their default configuration.");
+menuchecked=statusbar( _("Set up blocking rules.") );
 setpref(BOOL, "kmeleon.plugins.adblock.subs.core", true); 
 delpref("kmeleon.plugins.adblock.subs.easylist");
 delpref("kmeleon.plugins.adblock.subs.french");
@@ -655,7 +651,7 @@ setcmdicon("macros(basic_ab_Dummy)", "km-ab-dead.ico" );
 }
 
 basic_ab_Dummy{
-alert("The ad-blocking plugin is inactive. When you restart K-Meleon it will load new blocking rules and become active.", "AdBlock Locus", INFO);
+alert(_("The ad-blocking plugin is inactive. When you restart K-Meleon it will load new blocking rules and become active."), _("AdBlock Locus"), INFO);
 }
 
 
@@ -772,12 +768,12 @@ if (($VERSION >= 33685507) and (pluginexist(adblock)) ) {  # K-Meleon 75.1 or gr
     setmenu($_adSub, separator, 5);
 	setmenu($_adSub, macro, "Restore Defaults", "_Adblockplugin_Sub_Restore", 6);	
 # Supplemental subscriptions
-    setmenu($_adSupp, macro, "Français", "_Adblockplugin_Sub_Sup(french)", 0);			
-    setmenu($_adSupp, macro, "Español", "_Adblockplugin_Sub_Sup(spanish)", 1);			
-    setmenu($_adSupp, macro, "Deutsch", "_Adblockplugin_Sub_Sup(german)", 2);			
+    setmenu($_adSupp, macro, "&French", "_Adblockplugin_Sub_Sup(french)", 0);			
+    setmenu($_adSupp, macro, "&Spanish", "_Adblockplugin_Sub_Sup(spanish)", 1);			
+    setmenu($_adSupp, macro, "&German", "_Adblockplugin_Sub_Sup(german)", 2);			
     setmenu($_adSupp, macro, "Chinese", "_Adblockplugin_Sub_Sup(chinese)", 3);			
-    setmenu($_adSupp, macro, "Italiano", "_Adblockplugin_Sub_Sup(italian)", 4);			
-    setmenu($_adSupp, macro, "Russian", "_Adblockplugin_Sub_Sup(russian)", 5);			
+    setmenu($_adSupp, macro, "&Italian", "_Adblockplugin_Sub_Sup(italian)", 4);			
+    setmenu($_adSupp, macro, "&Russian", "_Adblockplugin_Sub_Sup(russian)", 5);			
     setmenu($_adSupp, macro, "- RU AdList: Counters", "_Adblockplugin_Sub_Sup(cntblock)", 6);	
     setmenu($_adSupp, separator, 7);     	
     setmenu($_adSupp, macro, "EasyPrivacy (Optimized)", "_Adblockplugin_Sub_Sup(privacy)", 8);			
@@ -805,22 +801,22 @@ _Adblockplugin_toolbar_set {
 $__abptog = getpref( BOOL, "kmeleon.plugins.adblock.disabled");
 $_Adblockplugin_rules = getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared");
 # Icons are base64 to fit inside macro file.
+$_km_path=getfolder(RootFolder)."\\skins\\shared\\Basic_Adblock.png";
+$EXISTS = fileexists($_km_path);
+if ($EXISTS){
+	$_adblockmacro_EIcon = "Basic_Adblock.png[".0.", 32 ,32]"; 
+	$_adblockmacro_DIcon = "Basic_Adblock.png[".1.", 32 ,32]"; 
+	$_adblockmacro_XIcon = "Basic_Adblock.png[".2.", 32 ,32]";
+}
+else{
 # Disabled icon:
-$_adblockmacro_DIcon = "data:image/png;base64,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"; 
+	$_adblockmacro_DIcon = "data:image/png;base64,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"; 
 # Enabled icon:
-$_adblockmacro_EIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABOvAAATrwFj5o7DAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAABWZJREFUWIXNl0tMVGcUx3/fvXfGGYYZBtBYRESoodYHSgWJxdbUjNYYjY8oxsQ0kYjtyqQrVy5l0Q26qhpt1OpGYqI0ssA0JVpcKL4oEsLEVhFpGOQxPGYmc2fu18U8HJzLCKZJ+0++5ObknO//P+f77rnnwn8MMVvHu1At4XMB1kx+EsJA+5dw/18R8BvYNDgFfDs7qUkhZ6Lw/VcQ+mAB98AehWbFZvN8eukSOR4PQtMyE+s6Y7dv03P4MDIUujMF27+GqTkLSCUvb2kha9WqjMTvItjTQ+e2bRiBQEYRpgJSyVdfv05WefmcyJMiurv5Y8+ejCLSBKSSr7pyJY3cCIcZf/gQpHy7iRAgBM7PPkOxTr+jwWfP6Dp4EGOG45gmIEk+b55nxblzONasScsq4PUSURSy16+fZp+8fx+LlNiXLUuP6e6mu67OVISaeGiBeRZoVqzWLctPncKxYgXoetoaf/IE56ZN2EpK0Fyu5BKqyuS9e9gLCtJiLG437qoqhltbi7VodP030HQJIgBKQoATTgtN27K8oQFHaSlyYiJt6f39RKamsJWWpmVpKy0lEgig9/ebxtqLivjk5EmEpnlUaJxWgTuwXsCZpUeP4qqoQIbDpmuiqwtrRQWOlStjZe/oIPz6NdbCQoSioPv9hDo7sbrdpvEWtxtrbi7+jo7KI9DyEwxo8YuwUSgK7vJypN+flh2AlJLAq1cU1NUlbaM3byINg+yqKgCyKyoYaG4mu6godjFN4C4vRygKhmF8ATzQACTYVFWFQAAjEDANDA0OInJysBUXAxAeGCDc0xN7jldhXnExSk4Owd5ebAsXmu4DIFQVaRh2gGRbM6TEGB2dMWjS68WVkv1EezsWKUFKJtrbya+tBcC5eTPjFy9itWb8ZCTxtq9KiRwZMXWSkQhBv5/CDRuStrHmZpzxtjx68yZ5+/cjhMBVU4OvsRHD55uxbcuUHjLNw3jzxjRgcnCQrLVrscyfD0Cwt5dwby+WJUtACMIvXhDyerGXlaHl5WFbvZrJJ09wzHQMpgIMA/3RI1P/KeCjEyfeZt/aitLXR9DnA0AJBhlrbcVeVgaAe+dO/r51C+vr1+YCDMO8AsLpTPPVdZ2wquKqqUnaQl4v4UWLGE7xC3m9yWdXTQ0vHQ6i0SiaxZIuQIhkFbRUo5mAwOAgOTt2oNjtSVvJ6dPmmcWh2O3kbt/O1I0buPPyMvsm+QHF6UxbU4ZB/t69GTcxQ+7u3UzpOiI7O23PVCQaUUhKibTbUVJubnB4GBwOHJWVQOxt6KyuJjwwYEqq5eez9vFjhMUSa07Z2YQjEWwpVTAikUT5g0kBCtw1pGTk1SsWpHx+/b295NXWIpRYofxtbUi/n4+3bjUV0NfezlhbG7lbtiAUhfwDBxhraqIg3rwARjo7kVKiwN04N9TAAwlnfB0dTA4NxcpktzPe18f8ffuSwUNXruBcvBgtP990OQsLeXP1atI/v7YW/8uXCJsNxelkcmgIX0cHAn6sgQfx6scQHz5/EarqKd63D0VV+aupCS3lzIxAgLL6eqy5uaYVCI+O4j1/HiUri8SbHpmYoCSexItr1zAikV8jsCMxrJoOJEJVPUsPHYp921MgLBYsLpcpeQL6+DhS16fZQj4fLy5fRkYiaQPJjCOZ0DRPSX09bpOpaC4Y7+riz7Nnkbr+/pHMTETpsWO41637MPKnT3ne2Dgj+YwC0kQcP05udfWcyP0PH/K8oSEjeUYB74ooOnKEBbt2odpsGYmjoRC+Gzfov3ABTM58TgIgNqw64Qfg2Pt838HPdviuEswnnNkKSKAdqqKwcTY/pyr8nnjP//f4B4Y3c72BBCZyAAAAAElFTkSuQmCC"; 
+	$_adblockmacro_EIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABOvAAATrwFj5o7DAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAABWZJREFUWIXNl0tMVGcUx3/fvXfGGYYZBtBYRESoodYHSgWJxdbUjNYYjY8oxsQ0kYjtyqQrVy5l0Q26qhpt1OpGYqI0ssA0JVpcKL4oEsLEVhFpGOQxPGYmc2fu18U8HJzLCKZJ+0++5ObknO//P+f77rnnwn8MMVvHu1At4XMB1kx+EsJA+5dw/18R8BvYNDgFfDs7qUkhZ6Lw/VcQ+mAB98AehWbFZvN8eukSOR4PQtMyE+s6Y7dv03P4MDIUujMF27+GqTkLSCUvb2kha9WqjMTvItjTQ+e2bRiBQEYRpgJSyVdfv05WefmcyJMiurv5Y8+ejCLSBKSSr7pyJY3cCIcZf/gQpHy7iRAgBM7PPkOxTr+jwWfP6Dp4EGOG45gmIEk+b55nxblzONasScsq4PUSURSy16+fZp+8fx+LlNiXLUuP6e6mu67OVISaeGiBeRZoVqzWLctPncKxYgXoetoaf/IE56ZN2EpK0Fyu5BKqyuS9e9gLCtJiLG437qoqhltbi7VodP030HQJIgBKQoATTgtN27K8oQFHaSlyYiJt6f39RKamsJWWpmVpKy0lEgig9/ebxtqLivjk5EmEpnlUaJxWgTuwXsCZpUeP4qqoQIbDpmuiqwtrRQWOlStjZe/oIPz6NdbCQoSioPv9hDo7sbrdpvEWtxtrbi7+jo7KI9DyEwxo8YuwUSgK7vJypN+flh2AlJLAq1cU1NUlbaM3byINg+yqKgCyKyoYaG4mu6godjFN4C4vRygKhmF8ATzQACTYVFWFQAAjEDANDA0OInJysBUXAxAeGCDc0xN7jldhXnExSk4Owd5ebAsXmu4DIFQVaRh2gGRbM6TEGB2dMWjS68WVkv1EezsWKUFKJtrbya+tBcC5eTPjFy9itWb8ZCTxtq9KiRwZMXWSkQhBv5/CDRuStrHmZpzxtjx68yZ5+/cjhMBVU4OvsRHD55uxbcuUHjLNw3jzxjRgcnCQrLVrscyfD0Cwt5dwby+WJUtACMIvXhDyerGXlaHl5WFbvZrJJ09wzHQMpgIMA/3RI1P/KeCjEyfeZt/aitLXR9DnA0AJBhlrbcVeVgaAe+dO/r51C+vr1+YCDMO8AsLpTPPVdZ2wquKqqUnaQl4v4UWLGE7xC3m9yWdXTQ0vHQ6i0SiaxZIuQIhkFbRUo5mAwOAgOTt2oNjtSVvJ6dPmmcWh2O3kbt/O1I0buPPyMvsm+QHF6UxbU4ZB/t69GTcxQ+7u3UzpOiI7O23PVCQaUUhKibTbUVJubnB4GBwOHJWVQOxt6KyuJjwwYEqq5eez9vFjhMUSa07Z2YQjEWwpVTAikUT5g0kBCtw1pGTk1SsWpHx+/b295NXWIpRYofxtbUi/n4+3bjUV0NfezlhbG7lbtiAUhfwDBxhraqIg3rwARjo7kVKiwN04N9TAAwlnfB0dTA4NxcpktzPe18f8ffuSwUNXruBcvBgtP990OQsLeXP1atI/v7YW/8uXCJsNxelkcmgIX0cHAn6sgQfx6scQHz5/EarqKd63D0VV+aupCS3lzIxAgLL6eqy5uaYVCI+O4j1/HiUri8SbHpmYoCSexItr1zAikV8jsCMxrJoOJEJVPUsPHYp921MgLBYsLpcpeQL6+DhS16fZQj4fLy5fRkYiaQPJjCOZ0DRPSX09bpOpaC4Y7+riz7Nnkbr+/pHMTETpsWO41637MPKnT3ne2Dgj+YwC0kQcP05udfWcyP0PH/K8oSEjeUYB74ooOnKEBbt2odpsGYmjoRC+Gzfov3ABTM58TgIgNqw64Qfg2Pt838HPdviuEswnnNkKSKAdqqKwcTY/pyr8nnjP//f4B4Y3c72BBCZyAAAAAElFTkSuQmCC"; 
 # Inactive icon:
-$_adblockmacro_XIcon = "data:image/png;base64,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";
-# change tool tip if from  _Adblockplugin_ICONS 
-#if ( $_Adblockplugin_IcoChg ) {
-#       # check icon and set tool tip
-#    if (getpref(BOOL, "kmeleon.plugins.adblock.icons.alternate" ) ) {
-#       $_adblockmacro_TTip = "AdBlock Locus: ON[green] OFF[red]" ; } else {
-#       $_adblockmacro_TTip = "Block ads. Right click for more options." ;}
-#   removebutton("AdBlock Locus", "macros(_Adblockplugin_toggle)" );
-#   addbutton("AdBlock Locus", "macros(_Adblockplugin_toggle)", "AdBlock Locus", $_adblockmacro_TTip);
-#   $_Adblockplugin_IcoChg = false;
-#   }
+	$_adblockmacro_XIcon = "data:image/png;base64,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";
+
+}
 $__abptog==0 ? setcmdicon( "macros(_Adblockplugin_toggle)", $_adblockmacro_EIcon ) : setcmdicon("macros(_Adblockplugin_toggle)", $_adblockmacro_DIcon );
 if (getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared")) {
   removebutton("AdBlock Locus", "macros(_Adblockplugin_toggle)" );
@@ -830,7 +826,8 @@ if (getpref(BOOL, "kmeleon.plugins.adblock.rules.cleared")) {
 }
 
 # Privacy Bar option
-# Add the below entry to "toolbars.cfg" to block ads from the Privacy Bar
+# Add the below entry to "toolbars.cfg" to block ads from the Privacy Bar.
+# Only works on the default theme and other newer 75-style themes.
 #	!Ads{
 #	macros(_Adblockplugin_toggle)|&Privacy
 #	Block ads with K-Meleon's built-in ad blocker.
